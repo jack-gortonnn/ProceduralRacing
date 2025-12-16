@@ -12,11 +12,11 @@ public static class PieceLibrary
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(0,0), new Point(0,1)),
         }),
-        new TrackPiece("2x1_hairpinLR", new Point(2,1), new List<Connection>{
+        new TrackPiece("2x1_hairpin", new Point(2,1), new List<Connection>{
             new Connection(new Point(0,0), new Point(0,1)),
             new Connection(new Point(1,0), new Point(0,1)),
         }),
-        new TrackPiece("2x2_chicane_LR", new Point(2,2), new List<Connection>{
+        new TrackPiece("2x2_chicane", new Point(2,2), new List<Connection>{
             new Connection(new Point(1,0), new Point(0,-1)),
             new Connection(new Point(0,1), new Point(0,1)),
         }),
@@ -36,43 +36,43 @@ public static class PieceLibrary
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(2,0), new Point(1,0)),
         }),
-        new TrackPiece("3x2_aintree_LR", new Point(3,2), new List<Connection>{
+        new TrackPiece("3x2_aintree", new Point(3,2), new List<Connection>{
             new Connection(new Point(0,1), new Point(0,1)),
             new Connection(new Point(2,1), new Point(1,0)),
         }),
-        new TrackPiece("3x2_chicane_LR", new Point(3,2), new List<Connection>{
+        new TrackPiece("3x2_chicane", new Point(3,2), new List<Connection>{
             new Connection(new Point(0,1), new Point(-1,0)),
             new Connection(new Point(2,0), new Point(1,0)),
         }),
-        new TrackPiece("3x2_club_LR", new Point(3,2), new List<Connection>{
+        new TrackPiece("3x2_club", new Point(3,2), new List<Connection>{
             new Connection(new Point(0,1), new Point(0,1)),
             new Connection(new Point(2,1), new Point(1,0)),
         }),
-        new TrackPiece("3x2_copse_LR", new Point(3,2), new List<Connection>{
+        new TrackPiece("3x2_copse", new Point(3,2), new List<Connection>{
             new Connection(new Point(0,1), new Point(0,1)),
             new Connection(new Point(2,0), new Point(1,0)),
         }),
-        new TrackPiece("3x2_hairpin2_LR", new Point(3,2), new List<Connection>{
+        new TrackPiece("3x2_hairpin2", new Point(3,2), new List<Connection>{
             new Connection(new Point(0,1), new Point(0,1)),
             new Connection(new Point(2,1), new Point(0,1)),
         }),
-        new TrackPiece("3x2_hairpin_LR", new Point(3,2), new List<Connection>{
+        new TrackPiece("3x2_hairpin", new Point(3,2), new List<Connection>{
             new Connection(new Point(0,1), new Point(0,1)),
             new Connection(new Point(2,1), new Point(1,0)),
         }),
-        new TrackPiece("3x2_hungary_LR", new Point(3,2), new List<Connection>{
+        new TrackPiece("3x2_hungary", new Point(3,2), new List<Connection>{
             new Connection(new Point(2,0), new Point(1,0)),
             new Connection(new Point(2,1), new Point(1,0)),
         }),
-        new TrackPiece("3x2_monza_LR", new Point(3,2), new List<Connection>{
+        new TrackPiece("3x2_monza", new Point(3,2), new List<Connection>{
             new Connection(new Point(0,1), new Point(-1,0)),
             new Connection(new Point(2,1), new Point(1,0)),
         }),
-        new TrackPiece("3x2_singapore_LR", new Point(3,2), new List<Connection>{
+        new TrackPiece("3x2_singapore", new Point(3,2), new List<Connection>{
             new Connection(new Point(0,1), new Point(0,1)),
             new Connection(new Point(2,1), new Point(0,1)),
         }),
-        new TrackPiece("3x2_snake_LR", new Point(3,2), new List<Connection>{
+        new TrackPiece("3x2_snake", new Point(3,2), new List<Connection>{
             new Connection(new Point(0,1), new Point(0,1)),
             new Connection(new Point(1,1), new Point(0,1)),
         }),

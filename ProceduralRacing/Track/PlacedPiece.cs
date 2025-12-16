@@ -1,85 +1,78 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 
 public class PlacedPiece
 {
-    public TrackPiece BasePiece { get; set; }
-    public Point GridPosition { get; set; }
-    public int Rotation { get; set; } = 0;
-    public bool IsFlipped { get; set; } = false;
+    // Original properties
+    public TrackPiece BasePiece { get; }
+    public Point GridPosition { get; }
+    public int Rotation { get; } // 0–3
+    public bool IsFlipped { get; }
 
-    public PlacedPiece(TrackPiece basePiece, Point gridPosition, int rotation, bool isFlipped)
+    // Transformed properties
+    public Point TransformedSize { get; }
+    public List<Connection> TransformedConnections { get; }
+
+    // Constructor
+    public PlacedPiece(TrackPiece basePiece, Point gridPosition, int rotation = 0, bool isFlipped = false)
     {
-        BasePiece = basePiece;
+        BasePiece = basePiece ?? throw new ArgumentNullException(nameof(basePiece));
         GridPosition = gridPosition;
-        Rotation = rotation;
+        Rotation = ((rotation % 4) + 4) % 4;
         IsFlipped = isFlipped;
-    }
 
-    public List<Connection> TransformedConnections
-    {
-        get
+        // Compute transformed size
+        TransformedSize = (Rotation % 2 == 0) ? BasePiece.Size : new Point(BasePiece.Size.Y, BasePiece.Size.X);
+
+        // Compute transformed connections
+        TransformedConnections = new List<Connection>();
+        int w = BasePiece.Size.X;
+        int h = BasePiece.Size.Y;
+        foreach (var con in BasePiece.Connections)
         {
-            List<Connection> result = new();
-            int width = (Rotation % 2 == 0) ? BasePiece.Size.X : BasePiece.Size.Y;
-            int height = (Rotation % 2 == 0) ? BasePiece.Size.Y : BasePiece.Size.X;
-
-            foreach (var c in BasePiece.Connections)
+            Point pos = con.Position;
+            Point dir = con.Direction;
+            if (IsFlipped)
             {
-                Point pos = c.Position;
-                Point dir = c.Direction;
-
-                // apply rotation
-                for (int i = 0; i < Rotation; i++)
-                {
-                    pos = new Point(pos.Y, width - 1 - pos.X);
-                    dir = new Point(dir.Y, -dir.X);
-                    int tmp = width;
-                    width = height;
-                    height = tmp;
-                }
-
-                // apply horizontal flip
-                if (IsFlipped)
-                {
-                    pos.X = width - 1 - pos.X;
-                    dir.X = -dir.X;
-                }
-
-                result.Add(new Connection(pos, dir));
+                pos = new Point(w - 1 - pos.X, pos.Y);
+                dir = new Point(-dir.X, dir.Y);
             }
-
-            return result;
+            Point finalPos = Rotation switch
+            {
+                1 => new Point(h - 1 - pos.Y, pos.X),
+                2 => new Point(w - 1 - pos.X, h - 1 - pos.Y),
+                3 => new Point(pos.Y, w - 1 - pos.X),
+                _ => pos
+            };
+            Point finalDir = Rotation switch
+            {
+                1 => new Point(-dir.Y, dir.X),
+                2 => new Point(-dir.X, -dir.Y),
+                3 => new Point(dir.Y, -dir.X),
+                _ => dir
+            };
+            TransformedConnections.Add(new Connection(finalPos, finalDir));
         }
     }
 
-
-    public Point GetAbsolutePosition(Connection connection)
+    // Draw method
+    public void Draw(SpriteBatch spriteBatch, Vector2 worldOffset, Texture2D pixel)
     {
-        return new Point(GridPosition.X + connection.Position.X, GridPosition.Y + connection.Position.Y);
-    }
-
-    public void Draw(SpriteBatch spriteBatch, Vector2 worldOffset)
-    {
-        var position = worldOffset + GridPosition.ToVector2() * 32;
-
-        SpriteEffects effects = IsFlipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-        float rotationRadians = MathHelper.ToRadians(Rotation * 90);
-
+        Vector2 drawPos = worldOffset + (GridPosition.ToVector2() * Constants.TileSize) + (TransformedSize.ToVector2() * 0.5f * Constants.TileSize);
+        
         spriteBatch.Draw(
-            BasePiece.Texture,
-            position,
-            null,
-            Color.White,
-            rotationRadians,
-            Vector2.Zero, // pivot at top-left
-            1f,
-            effects,
-            0f
+        BasePiece.Texture,
+        drawPos,
+        null,
+        Color.White,
+        MathHelper.ToRadians(Rotation * 90),
+        new Vector2(BasePiece.Texture.Width / 2f, BasePiece.Texture.Height / 2f),
+        1f,
+        IsFlipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+        0f
         );
+
     }
-
-
-
 }

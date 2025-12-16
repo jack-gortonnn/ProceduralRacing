@@ -8,13 +8,17 @@ namespace ProceduralRacing
 {
     public class Game1 : Game
     {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        private GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
 
-        TrackGenerator generator;
-        List<PlacedPiece> track;
+        private TrackGenerator generator;
+        private List<PlacedPiece> track;
+        private List<TrackPiece> pieces;
 
-        List<TrackPiece> pieces;
+        private Texture2D pixel;
+        private Grid grid;
+
+        private Vector2 worldOffset = new Vector2(0,0);
 
         public Game1()
         {
@@ -30,12 +34,18 @@ namespace ProceduralRacing
             pieces = PieceLibrary.All;
             generator = new TrackGenerator(pieces);
             track = generator.GenerateTrack();
+            grid = new Grid(minX: 0, maxX: 25, minY: 0, maxY: 25, tileSize: Constants.TileSize);
 
-            Debug.WriteLine($"{track.Count} pieces generated.");
-
-            foreach (var p in track)
+            // Mark occupied cells in grid
+            foreach (var piece in track)
             {
-                Debug.WriteLine($"{p.BasePiece.Name} at {p.GridPosition}");
+                grid.OccupyRectangle(piece.GridPosition, piece.TransformedSize);
+
+                Debug.WriteLine($"Placed {piece.BasePiece.Name} at {piece.GridPosition} | Rotation: {piece.Rotation * 90}° | Flipped: {piece.IsFlipped}");
+                foreach (var conn in piece.TransformedConnections)
+                {
+                    Debug.WriteLine($"   Connection: Pos={conn.Position} Dir={conn.Direction}");
+                }
             }
 
             base.Initialize();
@@ -50,23 +60,25 @@ namespace ProceduralRacing
                 piece.BasePiece.Texture = Content.Load<Texture2D>($"textures/{piece.BasePiece.Name}");
             }
 
+            pixel = new Texture2D(GraphicsDevice, 1, 1);
+            pixel.SetData(new[] { Color.White });
         }
 
         protected override void Update(GameTime gameTime)
         {
-
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
-
             spriteBatch.Begin();
+
+            grid.Draw(spriteBatch, pixel, worldOffset);
 
             foreach (var piece in track)
             {
-                piece.Draw(spriteBatch, new Vector2(100, 100));
+                piece.Draw(spriteBatch, worldOffset, pixel);
             }
 
             spriteBatch.End();
