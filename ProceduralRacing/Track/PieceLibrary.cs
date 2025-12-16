@@ -16,6 +16,10 @@ public static class PieceLibrary
             new Connection(new Point(0,0), new Point(0,1)),
             new Connection(new Point(1,0), new Point(0,1)),
         }),
+        new TrackPiece("2x1_straight", new Point(2,1), new List<Connection>{
+            new Connection(new Point(0,0), new Point(-1,0)),
+            new Connection(new Point(1,0), new Point(1,0)),
+        }),
         new TrackPiece("2x2_chicane", new Point(2,2), new List<Connection>{
             new Connection(new Point(1,0), new Point(0,-1)),
             new Connection(new Point(0,1), new Point(0,1)),
@@ -33,6 +37,10 @@ public static class PieceLibrary
             new Connection(new Point(0,1), new Point(0,1)),
         }),
         new TrackPiece("3x1_grid", new Point(3,1), new List<Connection>{
+            new Connection(new Point(0,0), new Point(-1,0)),
+            new Connection(new Point(2,0), new Point(1,0)),
+        }),
+        new TrackPiece("3x1_straight", new Point(3,1), new List<Connection>{
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(2,0), new Point(1,0)),
         }),

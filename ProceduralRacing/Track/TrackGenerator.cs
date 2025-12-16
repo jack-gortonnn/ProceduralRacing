@@ -27,8 +27,19 @@ public class TrackGenerator
         track.Clear();
         grid.Clear();
 
-        TryPlacePiece(piecePool.First(p => p.Name == "3x1_grid"), rotation: 0, flipped: false);
-        TryPlacePiece(piecePool.First(p => p.Name == "3x2_aintree"), rotation: 2, flipped: false);
+        // Add starting grid
+        var startPiece = piecePool.First(p => p.Name == "3x1_grid");
+        var startPlaced = new PlacedPiece(startPiece, currentEnd, rotation: 0, isFlipped: false);
+        OccupyGrid(startPlaced);
+        track.Add(startPlaced);
+
+        var startExit = startPlaced.TransformedConnections[1]; // right exit as it is a directional piece
+        currentEnd = startPlaced.GridPosition + startExit.Position + startExit.Direction;
+
+
+        TryPlacePiece(piecePool.First(p => p.Name == "2x2_singaporesling"), rotation: 1, flipped: false);
+        TryPlacePiece(piecePool.First(p => p.Name == "3x1_straight"), rotation: 1, flipped: false);
+        TryPlacePiece(piecePool.First(p => p.Name == "3x2_copse"), rotation: 3, flipped: false);
 
         return track;
     }
@@ -37,7 +48,7 @@ public class TrackGenerator
     {
         var placed = new PlacedPiece(piece, currentEnd, rotation, flipped);
 
-        // Check for collisions
+        // Check for collisions with already-occupied grid cells
         for (int dx = 0; dx < placed.TransformedSize.X; dx++)
         {
             for (int dy = 0; dy < placed.TransformedSize.Y; dy++)
@@ -48,15 +59,40 @@ public class TrackGenerator
         }
 
         // Occupy grid & add to track
-        track.Add(placed);
         OccupyGrid(placed);
+        track.Add(placed);
 
-        // Update current endpoint
-        if (placed.TransformedConnections.Count > 0)
+        // Choose the exit connection from the transformed connections.
+        // Prefer a connection whose adjacent cell (position + direction) is NOT already occupied.
+        Connection exitConnection = null;
+        if (placed.TransformedConnections != null && placed.TransformedConnections.Count > 0)
         {
-            var conn = placed.TransformedConnections[1];
-            currentEnd = placed.GridPosition + conn.Position + conn.Direction;
+            exitConnection = placed.TransformedConnections
+                .FirstOrDefault(con =>
+                {
+                    var adjacent = new Point(
+                        placed.GridPosition.X + con.Position.X + con.Direction.X,
+                        placed.GridPosition.Y + con.Position.Y + con.Direction.Y
+                    );
+                    return !grid.ContainsKey(adjacent);
+                });
+
+            // fallback to preferred indices if none found
+            if (exitConnection == null)
+            {
+                if (placed.TransformedConnections.Count > 1)
+                    exitConnection = placed.TransformedConnections[1];
+                else
+                    exitConnection = placed.TransformedConnections[0];
+            }
         }
+        else
+        {
+            exitConnection = new Connection(new Point(0, 0), new Point(0, 0));
+        }
+
+        // Update current endpoint in grid coordinates
+        currentEnd = placed.GridPosition + exitConnection.Position + exitConnection.Direction;  
 
         return true;
     }
