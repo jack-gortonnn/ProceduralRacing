@@ -31,10 +31,10 @@ namespace ProceduralRacing
 
         protected override void Initialize()
         {
-            pieces = PieceLibrary.All;
-            generator = new TrackGenerator(pieces);
-            track = generator.GenerateTrack();
             grid = new Grid(minX: 0, maxX: 25, minY: 0, maxY: 25, tileSize: Constants.TileSize);
+            pieces = PieceLibrary.All;
+            generator = new TrackGenerator(pieces, grid);
+            track = generator.GenerateTrack();
 
             // Mark occupied cells in grid
             foreach (var piece in track)

@@ -4,117 +4,76 @@ using System.Linq;
 
 public class TrackGenerator
 {
-    private List<TrackPiece> piecePool;
-    private List<PlacedPiece> track;
-    private Dictionary<Point, bool> grid;
-
-    public IReadOnlyDictionary<Point, bool> Grid => grid;
+    private List<TrackPiece> PiecePool;
+    private List<PlacedPiece> Track;
+    private Grid Grid;
 
     private Point currentEnd;
-    private Point lastExitDirection;
+    private Connection lastExitConnection;
 
     public int GridOriginX = 9;
     public int GridOriginY = 7;
 
-    public TrackGenerator(List<TrackPiece> availablePieces)
+    public TrackGenerator(List<TrackPiece> availablePieces, Grid grid)
     {
-        piecePool = availablePieces;
-        track = new List<PlacedPiece>();
-        grid = new Dictionary<Point, bool>();
+        PiecePool = availablePieces;
+        Track = new List<PlacedPiece>();
+        Grid = grid;
         currentEnd = new Point(GridOriginX, GridOriginY);
     }
 
     public List<PlacedPiece> GenerateTrack()
     {
-        track.Clear();
-        grid.Clear();
+        Track.Clear();
+        Grid.Clear();
 
         // Place starting piece
-        var startPiece = piecePool.First(p => p.Name == "3x1_grid");
+        var startPiece = PiecePool.First(p => p.Name == "3x1_grid");
         var startPlaced = new PlacedPiece(startPiece, new Point(GridOriginX, GridOriginY), rotation: 0, isFlipped: false);
 
-        OccupyGrid(startPlaced);
-        track.Add(startPlaced);
+        Grid.OccupyRectangle(startPlaced.GridPosition, startPlaced.TransformedSize); 
+        Track.Add(startPlaced);
 
-        var startExit = startPlaced.TransformedConnections[1];
-        currentEnd = startPlaced.GridPosition + startExit.Position + startExit.Direction;
-        lastExitDirection = startExit.Direction;
+        lastExitConnection = startPlaced.TransformedConnections[1];
+        currentEnd = startPlaced.GridPosition + lastExitConnection.Position + lastExitConnection.Direction;
 
         // Test pieces
-        TryPlacePiece(piecePool.First(p => p.Name == "2x2_singaporesling"), rotation: 1, flipped: false);
-        TryPlacePiece(piecePool.First(p => p.Name == "3x1_straight"), rotation: 1, flipped: false);
-        TryPlacePiece(piecePool.First(p => p.Name == "3x2_copse"), rotation: 3, flipped: false);
-        TryPlacePiece(piecePool.First(p => p.Name == "2x1_straight"), rotation: 0, flipped: false);
-        TryPlacePiece(piecePool.First(p => p.Name == "3x2_copse"), rotation: 1, flipped: true);
-        TryPlacePiece(piecePool.First(p => p.Name == "3x2_copse"), rotation: 0, flipped: true);
-        TryPlacePiece(piecePool.First(p => p.Name == "3x2_copse"), rotation: 3, flipped: false);
+        TryPlacePiece(PiecePool.First(p => p.Name == "2x2_singaporesling"), rotation: 1, flipped: false);
+        TryPlacePiece(PiecePool.First(p => p.Name == "3x1_straight"), rotation: 1, flipped: false);
+        TryPlacePiece(PiecePool.First(p => p.Name == "3x2_copse"), rotation: 3, flipped: false);
+        TryPlacePiece(PiecePool.First(p => p.Name == "2x1_straight"), rotation: 0, flipped: false);
+        TryPlacePiece(PiecePool.First(p => p.Name == "3x2_copse"), rotation: 1, flipped: true);
+        TryPlacePiece(PiecePool.First(p => p.Name == "3x2_copse"), rotation: 0, flipped: true);
+        TryPlacePiece(PiecePool.First(p => p.Name == "3x2_copse"), rotation: 3, flipped: false);
 
-        return track;
+        return Track;
     }
 
+    // Attempts to place a piece at the current end of the track, then updates state if successful
     public bool TryPlacePiece(TrackPiece piece, int rotation = 0, bool flipped = false)
     {
         var tempPlaced = new PlacedPiece(piece, new Point(0, 0), rotation, flipped);
 
-        // Find required entry direction (opposite of last exit)
-        Point requiredEntryDirection = new Point(-lastExitDirection.X, -lastExitDirection.Y);
+        // Check for matching entry connection
+        Connection entryCon = tempPlaced.TransformedConnections.FirstOrDefault(c => c.IsOpposite(lastExitConnection));
+        if (entryCon == null) return false;
 
-        // Find compatible entry connection
-        var entryCon = tempPlaced.TransformedConnections
-            .FirstOrDefault(c => c.Direction == requiredEntryDirection);
-
-        // No compatible entry port facing the right way, discard piece
-        if (entryCon == null)
-            return false;
-
-        // Calculate grid position based on current end and entry connection
-        Point gridPos = currentEnd - entryCon.Position;
-        var placed = new PlacedPiece(piece, gridPos, rotation, flipped);
-
-        // Collision check, otherwise discard piece
-        var size = placed.TransformedSize;
-        for (int dx = 0; dx < size.X; dx++)
-        {
-            for (int dy = 0; dy < size.Y; dy++)
-            {
-                var cell = new Point(gridPos.X + dx, gridPos.Y + dy);
-                if (grid.ContainsKey(cell))
-                    return false;
-            }
-        }
+        // Check for no overlap with occupied cells
+        var placed = new PlacedPiece(piece, currentEnd - entryCon.Position, rotation, flipped);
+        if (Grid.IsRectangleOccupied(placed.GridPosition, placed.TransformedSize)) return false;
 
         // Place piece
-        OccupyGrid(placed);
-        track.Add(placed);
+        Track.Add(placed);
+        Grid.OccupyRectangle(placed.GridPosition, placed.TransformedSize);
 
-        // Choose exit connection, ideally one that leads to empty space
-        Connection exitConnection = placed.TransformedConnections
-            .FirstOrDefault(con =>
-            {
-                var adjacent = placed.GridPosition + con.Position + con.Direction;
-                return !grid.ContainsKey(adjacent);
-            });
+        // Check for valid exit connection
+        Connection exitCon = placed.TransformedConnections.FirstOrDefault(c => c.LeadsToEmptySpace(placed.GridPosition, Grid));
+        if (exitCon == null ||  exitCon == entryCon) return false;
 
-        // Couldn't find an exit leading to empty space, just pick any other exit
-        if (exitConnection == null || exitConnection.Direction == entryCon.Direction)
-        {
-            exitConnection = placed.TransformedConnections
-                .FirstOrDefault(c => c != entryCon)
-                ?? placed.TransformedConnections[0];
-        }
-
-        // Update current endpoint and last exit direction
-        currentEnd = placed.GridPosition + exitConnection.Position + exitConnection.Direction;
-        lastExitDirection = exitConnection.Direction;
+        // Update state for next piece
+        lastExitConnection = exitCon;
+        currentEnd = placed.GridPosition + exitCon.Position + exitCon.Direction;
 
         return true;
-    }
-
-    private void OccupyGrid(PlacedPiece p)
-    {
-        var size = p.TransformedSize;
-        for (int dx = 0; dx < size.X; dx++)
-            for (int dy = 0; dy < size.Y; dy++)
-                grid[new Point(p.GridPosition.X + dx, p.GridPosition.Y + dy)] = true;
     }
 }

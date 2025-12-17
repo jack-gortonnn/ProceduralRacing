@@ -22,8 +22,8 @@ public class Grid
         TileSize = tileSize;
     }
 
+    public void Clear() => occupied.Clear();
     public bool IsOccupied(Point cell) => occupied.ContainsKey(cell) && occupied[cell];
-
     public void Occupy(Point cell) => occupied[cell] = true;
 
     public void OccupyRectangle(Point topLeft, Point size)
@@ -33,12 +33,21 @@ public class Grid
                 Occupy(new Point(topLeft.X + x, topLeft.Y + y));
     }
 
-    public IReadOnlyDictionary<Point, bool> OccupiedCells => occupied;
+    public bool IsRectangleOccupied(Point topLeft, Point size)
+    {
+        for (int x = 0; x < size.X; x++)
+            for (int y = 0; y < size.Y; y++)
+            {
+                if (IsOccupied(new Point(topLeft.X + x, topLeft.Y + y)))
+                    return true;
+            }
+
+        return false;
+    }
 
     public Vector2 ToWorldPosition(Point cell, Vector2 offset) =>
         offset + cell.ToVector2() * TileSize;
 
-    // Draws the grid and optionally highlights occupied cells
     public void Draw(SpriteBatch spriteBatch, Texture2D pixel, Vector2 offset)
     {
         if (spriteBatch == null || pixel == null) return;
