@@ -62,13 +62,13 @@ public class TrackGenerator
         var placed = new PlacedPiece(piece, currentEnd - entryCon.Position, rotation, flipped);
         if (Grid.IsRectangleOccupied(placed.GridPosition, placed.TransformedSize)) return false;
 
+        // Check for valid exit connection
+        Connection exitCon = placed.TransformedConnections.FirstOrDefault(c => c.LeadsToEmptySpace(placed.GridPosition, Grid));
+        if (exitCon == null || exitCon == entryCon) return false;
+
         // Place piece
         Track.Add(placed);
         Grid.OccupyRectangle(placed.GridPosition, placed.TransformedSize);
-
-        // Check for valid exit connection
-        Connection exitCon = placed.TransformedConnections.FirstOrDefault(c => c.LeadsToEmptySpace(placed.GridPosition, Grid));
-        if (exitCon == null ||  exitCon == entryCon) return false;
 
         // Update state for next piece
         lastExitConnection = exitCon;

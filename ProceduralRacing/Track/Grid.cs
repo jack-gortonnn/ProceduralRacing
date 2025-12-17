@@ -24,13 +24,21 @@ public class Grid
 
     public void Clear() => occupied.Clear();
     public bool IsOccupied(Point cell) => occupied.ContainsKey(cell) && occupied[cell];
-    public void Occupy(Point cell) => occupied[cell] = true;
+    public void OccupyCell(Point cell) => occupied[cell] = true;
+    public void UnoccupyCell(Point cell) => occupied[cell] = false;
 
     public void OccupyRectangle(Point topLeft, Point size)
     {
         for (int x = 0; x < size.X; x++)
             for (int y = 0; y < size.Y; y++)
-                Occupy(new Point(topLeft.X + x, topLeft.Y + y));
+                OccupyCell(new Point(topLeft.X + x, topLeft.Y + y));
+    }
+
+    public void UnoccupyRectangle(Point topLeft, Point size)
+    {
+        for (int x = 0; x < size.X; x++)
+            for (int y = 0; y < size.Y; y++)
+                UnoccupyCell(new Point(topLeft.X + x, topLeft.Y + y));
     }
 
     public bool IsRectangleOccupied(Point topLeft, Point size)
@@ -61,17 +69,8 @@ public class Grid
                 bool occupiedCell = IsOccupied(cell);
                 Color fillColor = occupiedCell ? Color.Red * 0.5f : Color.Green * 0.05f;
 
-                spriteBatch.Draw(
-                    pixel,
-                    ToWorldPosition(cell, offset),
-                    null,
-                    fillColor,
-                    0f,
-                    Vector2.Zero,
-                    new Vector2(TileSize, TileSize),
-                    SpriteEffects.None,
-                    0f
-                );
+                spriteBatch.Draw(pixel, ToWorldPosition(cell, offset), null, fillColor, 0f,
+                    Vector2.Zero, new Vector2(TileSize, TileSize), SpriteEffects.None, 0f); 
             }
         }
 
