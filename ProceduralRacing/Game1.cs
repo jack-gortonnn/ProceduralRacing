@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +12,7 @@ namespace ProceduralRacing
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
+        private Camera camera;
         private TrackGenerator generator;
         private List<PlacedPiece> track;
         private List<TrackPiece> pieces;
@@ -35,6 +37,7 @@ namespace ProceduralRacing
             pieces = PieceLibrary.All;
             generator = new TrackGenerator(pieces, grid);
             track = generator.GenerateTrack();
+            camera = new Camera(new Vector2(0,0), 1f);
 
             // Mark occupied cells in grid
             foreach (var piece in track)
@@ -66,19 +69,33 @@ namespace ProceduralRacing
 
         protected override void Update(GameTime gameTime)
         {
+            KeyboardState kb = Keyboard.GetState();
+            Vector2 move = Vector2.Zero;
+
+            if (kb.IsKeyDown(Keys.W)) move.Y -= 10f;
+            if (kb.IsKeyDown(Keys.S)) move.Y += 10f;
+            if (kb.IsKeyDown(Keys.A)) move.X -= 10f;
+            if (kb.IsKeyDown(Keys.D)) move.X += 10f;
+
+            camera.Move(move);
+
+            if (kb.IsKeyDown(Keys.Q)) camera.AddZoom(-0.01f);
+            if (kb.IsKeyDown(Keys.E)) camera.AddZoom(0.01f);
+
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
-            spriteBatch.Begin();
+            spriteBatch.Begin(transformMatrix: camera.GetViewMatrix(),
+                samplerState: Microsoft.Xna.Framework.Graphics.SamplerState.LinearClamp);
 
-            grid.Draw(spriteBatch, pixel, worldOffset);
+            grid.Draw(spriteBatch, pixel, Vector2.Zero);
 
             foreach (var piece in track)
             {
-                piece.Draw(spriteBatch, worldOffset, pixel);
+                piece.Draw(spriteBatch, Vector2.Zero, pixel);
             }
 
             spriteBatch.End();
