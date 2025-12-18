@@ -1,4 +1,4 @@
 ﻿public class Constants
 {
-    public const int TileSize = 32;
+    public const int TileSize = 64;
 }

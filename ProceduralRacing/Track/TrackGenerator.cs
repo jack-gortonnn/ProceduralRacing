@@ -11,8 +11,8 @@ public class TrackGenerator
     private Point currentEnd;
     private Connection lastExitConnection;
 
-    public int GridOriginX = 9;
-    public int GridOriginY = 7;
+    public int GridOriginX = 3;
+    public int GridOriginY = 3;
 
     public TrackGenerator(List<TrackPiece> availablePieces, Grid grid)
     {
@@ -28,7 +28,7 @@ public class TrackGenerator
         Grid.Clear();
 
         // Place starting piece
-        var startPiece = PiecePool.First(p => p.Name == "3x1_grid");
+        var startPiece = PiecePool.First(p => p.Name == "5x1_grid");
         var startPlaced = new PlacedPiece(startPiece, new Point(GridOriginX, GridOriginY), rotation: 0, isFlipped: false);
 
         Grid.OccupyRectangle(startPlaced.GridPosition, startPlaced.TransformedSize); 
@@ -39,12 +39,6 @@ public class TrackGenerator
 
         // Test pieces
         TryPlacePiece(PiecePool.First(p => p.Name == "2x2_singaporesling"), rotation: 1, flipped: false);
-        TryPlacePiece(PiecePool.First(p => p.Name == "3x1_straight"), rotation: 1, flipped: false);
-        TryPlacePiece(PiecePool.First(p => p.Name == "3x2_copse"), rotation: 3, flipped: false);
-        TryPlacePiece(PiecePool.First(p => p.Name == "2x1_straight"), rotation: 0, flipped: false);
-        TryPlacePiece(PiecePool.First(p => p.Name == "3x2_copse"), rotation: 1, flipped: true);
-        TryPlacePiece(PiecePool.First(p => p.Name == "3x2_copse"), rotation: 0, flipped: true);
-        TryPlacePiece(PiecePool.First(p => p.Name == "3x2_copse"), rotation: 3, flipped: false);
 
         return Track;
     }
