@@ -27,8 +27,10 @@ namespace ProceduralRacing
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferHeight = 800;
             graphics.PreferredBackBufferWidth = 800;
+            graphics.PreferMultiSampling = true;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            graphics.ApplyChanges();
         }
 
         protected override void Initialize()
