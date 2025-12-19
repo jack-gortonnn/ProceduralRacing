@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,20 +23,26 @@ public class TrackGenerator
         currentEnd = new Point(GridOriginX, GridOriginY);
     }
 
-    public List<PlacedPiece> GenerateTrack()
+    private void ResetState()
     {
         Track.Clear();
         Grid.Clear();
+        currentEnd = new Point(GridOriginX, GridOriginY);
+        lastExitConnection = null;
+    }
+
+    public List<PlacedPiece> GenerateTrack()
+    {
+        ResetState();
 
         // Place starting piece
-        var startPiece = PiecePool.First(p => p.Name == "5x1_grid");
-        var startPlaced = new PlacedPiece(startPiece, new Point(GridOriginX, GridOriginY), rotation: 0, isFlipped: false);
+        var startPiece = new PlacedPiece(PiecePool.First(p => p.Name == "5x1_grid"), new Point(GridOriginX, GridOriginY), rotation: 0, isFlipped: false);
 
-        Grid.OccupyRectangle(startPlaced.GridPosition, startPlaced.TransformedSize); 
-        Track.Add(startPlaced);
+        Grid.OccupyRectangle(startPiece.GridPosition, startPiece.TransformedSize); 
+        Track.Add(startPiece);
 
-        lastExitConnection = startPlaced.TransformedConnections[1];
-        currentEnd = startPlaced.GridPosition + lastExitConnection.Position + lastExitConnection.Direction;
+        lastExitConnection = startPiece.TransformedConnections[1];
+        currentEnd = startPiece.GridPosition + lastExitConnection.Position + lastExitConnection.Direction;
 
         // Test pieces
         TryPlacePiece(PiecePool.First(p => p.Name == "2x2_singaporesling"), rotation: 1, flipped: false);

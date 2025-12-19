@@ -29,6 +29,7 @@ namespace ProceduralRacing
             graphics.PreferredBackBufferWidth = 800;
             graphics.PreferMultiSampling = true;
             Content.RootDirectory = "Content";
+            Window.AllowUserResizing = true; // for now
             IsMouseVisible = true;
             graphics.ApplyChanges();
         }
@@ -93,11 +94,11 @@ namespace ProceduralRacing
             spriteBatch.Begin(transformMatrix: camera.GetViewMatrix(),
                 samplerState: Microsoft.Xna.Framework.Graphics.SamplerState.LinearClamp);
 
-            grid.Draw(spriteBatch, pixel, Vector2.Zero);
+            grid.Draw(spriteBatch, pixel);
 
             foreach (var piece in track)
             {
-                piece.Draw(spriteBatch, Vector2.Zero, pixel);
+                piece.Draw(spriteBatch);
             }
 
             spriteBatch.End();

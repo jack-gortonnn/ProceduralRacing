@@ -58,9 +58,9 @@ public class PlacedPiece
     }
 
     // Draw method
-    public void Draw(SpriteBatch spriteBatch, Vector2 worldOffset, Texture2D pixel)
+    public void Draw(SpriteBatch spriteBatch)
     {
-        Vector2 drawPos = worldOffset + (GridPosition.ToVector2() * Constants.TileSize) + (TransformedSize.ToVector2() * 0.5f * Constants.TileSize);
+        Vector2 drawPos = (GridPosition.ToVector2() * Constants.TileSize) + (TransformedSize.ToVector2() * 0.5f * Constants.TileSize);
         
         spriteBatch.Draw(
         BasePiece.Texture,

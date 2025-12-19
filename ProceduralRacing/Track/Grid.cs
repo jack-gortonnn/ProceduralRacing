@@ -53,10 +53,10 @@ public class Grid
         return false;
     }
 
-    public Vector2 ToWorldPosition(Point cell, Vector2 offset) =>
-        offset + cell.ToVector2() * TileSize;
+    public Vector2 ToWorldPosition(Point cell) =>
+        cell.ToVector2() * TileSize;
 
-    public void Draw(SpriteBatch spriteBatch, Texture2D pixel, Vector2 offset)
+    public void Draw(SpriteBatch spriteBatch, Texture2D pixel)
     {
         if (spriteBatch == null || pixel == null) return;
 
@@ -69,7 +69,7 @@ public class Grid
                 bool occupiedCell = IsOccupied(cell);
                 Color fillColor = occupiedCell ? Color.Red * 0.5f : Color.Green * 0.05f;
 
-                spriteBatch.Draw(pixel, ToWorldPosition(cell, offset), null, fillColor, 0f,
+                spriteBatch.Draw(pixel, ToWorldPosition(cell), null, fillColor, 0f,
                     Vector2.Zero, new Vector2(TileSize, TileSize), SpriteEffects.None, 0f); 
             }
         }
@@ -78,7 +78,7 @@ public class Grid
         Color lineColor = Color.White * 0.25f;
         for (int x = MinX; x <= MaxX + 1; x++)
         {
-            Vector2 pos = ToWorldPosition(new Point(x, MinY), offset);
+            Vector2 pos = ToWorldPosition(new Point(x, MinY));
             spriteBatch.Draw(pixel, pos, null, lineColor, 0f,
                 Vector2.Zero, new Vector2(1, (MaxY - MinY + 1) * TileSize), SpriteEffects.None, 0f);
         }
@@ -86,7 +86,7 @@ public class Grid
         // Draw horizontal grid lines
         for (int y = MinY; y <= MaxY + 1; y++)
         {
-            Vector2 pos = ToWorldPosition(new Point(MinX, y), offset);
+            Vector2 pos = ToWorldPosition(new Point(MinX, y));
             spriteBatch.Draw(pixel, pos, null, lineColor, 0f,
                 Vector2.Zero, new Vector2((MaxX - MinX + 1) * TileSize, 1), SpriteEffects.None, 0f);
         }
