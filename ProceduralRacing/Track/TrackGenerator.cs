@@ -48,29 +48,46 @@ public class TrackGenerator
             startExit.Direction
         );
 
-        TryPlacePiece(PiecePool.First(p => p.Name == "2x2_singaporesling"), rotation: 1, flipped: false);
-        TryPlacePiece(PiecePool.First(p => p.Name == "3x1_straight"), rotation: 1, flipped: true);
-        TryPlacePiece(PiecePool.First(p => p.Name == "2x2_singaporesling"), rotation: 0, flipped: true);
+        var piece = PiecePool.First(p => p.Name == "2x2_singaporesling");
+
+        if (TryFindPlacement(piece, rotation: 1, flipped: false, out var placed, out var exit))
+        {
+            AddPiece(placed, exit);
+        }
+
+        var piece2 = PiecePool.First(p => p.Name == "5x2_maggotsbecketts");
+
+        if (TryFindPlacement(piece2, rotation: 3, flipped: false, out var placed2, out var exit2))
+        {
+            AddPiece(placed2, exit2);
+        }
+
 
         return Track;
     }
 
-    public bool TryPlacePiece(TrackPiece piece, int rotation = 0, bool flipped = false)
+    public bool TryFindPlacement(TrackPiece piece, int rotation, bool flipped, out PlacedPiece placed, out Connection exit)
     {
-        var transformedConnections = piece.GetTransformedConnections(rotation, flipped);  
-        
-        Connection entryCon = transformedConnections.FirstOrDefault(c => c.IsOpposite(currentConnection.Direction));
-        if (entryCon == null) return false;
-   
-        var placed = new PlacedPiece(piece, currentConnection.GridPosition - entryCon.Position, rotation, flipped);                             
+        placed = null;
+        exit = null;
 
-        if (Grid.IsRectangleOccupied(placed.GridPosition, placed.TransformedSize)) return false;
+        var transformedConnections = piece.GetTransformedConnections(rotation, flipped);
 
-        Connection exitCon = transformedConnections.FirstOrDefault(c => c != entryCon && c.LeadsToEmptySpace(placed.GridPosition, Grid));  
+        var entry = transformedConnections.FirstOrDefault(c => c.IsOpposite(currentConnection.Direction));
+        if (entry == null) return false;
+
+        var candidate = new PlacedPiece(piece, currentConnection.GridPosition - entry.Position, rotation, flipped);
+
+        // Collision check
+        if (Grid.IsRectangleOccupied(candidate.GridPosition, candidate.TransformedSize)) return false;
+
+        // Find valid exit
+        var exitCon = transformedConnections.FirstOrDefault(c => c != entry && c.LeadsToEmptySpace(candidate.GridPosition, Grid));
+
         if (exitCon == null) return false;
 
-        AddPiece(placed, exitCon);
-
+        placed = candidate;
+        exit = exitCon;
         return true;
     }
 
