@@ -2,18 +2,20 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-
 public class TrackPiece
 {
     public string Name { get; set; }
     public Point Size { get; set; }
+    public TrackType Type { get; }
     public List<Connection> Connections { get; set; }
+
     public Texture2D Texture { get; set; }
 
-    public TrackPiece(string name, Point size, List<Connection> connections)
+    public TrackPiece(string name, Point size, TrackType type, List<Connection> connections)
     {
         Name = name;
         Size = size;
+        Type = type;
         Connections = connections;
     }
 
@@ -57,3 +59,6 @@ public class TrackPiece
 		return transformedConnections;
 	}
 }
+
+// Enum to categorize track pieces by type, used for generation logic
+public enum TrackType { Grid, Straight, Turn, Hairpin, Chicane, Complex }
