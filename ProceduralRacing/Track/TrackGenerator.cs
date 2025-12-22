@@ -32,12 +32,7 @@ public class TrackGenerator
     {
         ResetState();
 
-        var startPiece = new PlacedPiece(
-            PiecePool.First(p => p.Name == "5x1_grid"),
-            new Point(GridOriginX, GridOriginY),
-            rotation: 0,
-            isFlipped: false
-        );
+        var startPiece = new PlacedPiece(PiecePool.First(p => p.Name == "5x1_grid"), 0, false, new Point(GridOriginX, GridOriginY));
 
         Grid.OccupyRectangle(startPiece.GridPosition, startPiece.TransformedSize);
         Track.Add(startPiece);
@@ -71,24 +66,43 @@ public class TrackGenerator
         placed = null;
         exit = null;
 
-        var transformedConnections = piece.GetTransformedConnections(rotation, flipped);
+        var connections = piece.GetTransformedConnections(rotation, flipped);
 
-        var entry = transformedConnections.FirstOrDefault(c => c.IsOpposite(currentConnection.Direction));
-        if (entry == null) return false;
+        // 1. Find a valid entry connection
+        if (!HasValidEntry(connections, out var entry))
+            return false;
 
-        var candidate = new PlacedPiece(piece, currentConnection.GridPosition - entry.Position, rotation, flipped);
+        // 2. Make a placement based on that entry and see if it fits
+        var candidate = new PlacedPiece(piece, rotation, flipped, currentConnection.GridPosition - entry.Position);
+        if (!HasValidPlacement(candidate))
+            return false;
 
-        // Collision check
-        if (Grid.IsRectangleOccupied(candidate.GridPosition, candidate.TransformedSize)) return false;
-
-        // Find valid exit
-        var exitCon = transformedConnections.FirstOrDefault(c => c != entry && c.LeadsToEmptySpace(candidate.GridPosition, Grid));
-
-        if (exitCon == null) return false;
+        // 3. Find a valid exit connection that leads to empty space
+        if (!HasValidExit(connections, entry, candidate, out exit))
+            return false;
 
         placed = candidate;
-        exit = exitCon;
         return true;
+    }
+
+    // ----- Helpers -----
+
+    private bool HasValidEntry(List<Connection> connections, out Connection entry)
+    {
+        entry = connections.FirstOrDefault(c => c.IsOpposite(currentConnection.Direction));
+        return entry != null;
+    }
+
+    private bool HasValidPlacement(PlacedPiece candidate)
+    {
+        var placement = Grid.IsRectangleOccupied(candidate.GridPosition, candidate.TransformedSize);
+        return !placement;
+    }
+
+    private bool HasValidExit(List<Connection> connections, Connection entry, PlacedPiece candidate, out Connection exit)
+    {
+        exit = connections.FirstOrDefault(c => c != entry && c.LeadsToEmptySpace(candidate.GridPosition, Grid));
+        return exit != null;
     }
 
     public void AddPiece(PlacedPiece piece, Connection exit)

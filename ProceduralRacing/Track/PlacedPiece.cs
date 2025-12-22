@@ -6,14 +6,14 @@ using System.Collections.Generic;
 public class PlacedPiece
 {
     public TrackPiece BasePiece { get; }
-    public Point GridPosition { get; }
     public int Rotation { get; }
     public bool IsFlipped { get; }
+    public Point GridPosition { get; }
 
     public Point TransformedSize { get; }
     public List<Connection> TransformedConnections { get; }
 
-    public PlacedPiece(TrackPiece basePiece, Point gridPosition, int rotation = 0, bool isFlipped = false)
+    public PlacedPiece(TrackPiece basePiece, int rotation, bool isFlipped, Point gridPosition)
     {
         BasePiece = basePiece;
         GridPosition = gridPosition;
