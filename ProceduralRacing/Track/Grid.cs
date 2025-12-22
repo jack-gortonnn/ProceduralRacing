@@ -23,9 +23,14 @@ public class Grid
     }
 
     public void Clear() => occupied.Clear();
+
     public bool IsOccupied(Point cell) => occupied.ContainsKey(cell) && occupied[cell];
+
     public void OccupyCell(Point cell) => occupied[cell] = true;
+
     public void UnoccupyCell(Point cell) => occupied[cell] = false;
+
+    public Vector2 ToWorldPosition(Point cell) => cell.ToVector2() * TileSize;
 
     public void OccupyRectangle(Point topLeft, Point size)
     {
@@ -53,8 +58,12 @@ public class Grid
         return false;
     }
 
-    public Vector2 ToWorldPosition(Point cell) =>
-        cell.ToVector2() * TileSize;
+    public bool IsRectangleInBounds(Point topLeft, Point size)
+    {
+        return topLeft.X >= MinX && topLeft.Y >= MinY &&
+               (topLeft.X + size.X - 1) <= MaxX &&
+               (topLeft.Y + size.Y - 1) <= MaxY;
+    }
 
     public void Draw(SpriteBatch spriteBatch, Texture2D pixel)
     {
