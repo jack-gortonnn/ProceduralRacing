@@ -38,7 +38,7 @@ namespace ProceduralRacing
         {
             grid = new Grid(minX: 0, maxX: 25, minY: 0, maxY: 25, tileSize: Constants.TileSize);
             pieces = PieceLibrary.All;
-            generator = new TrackGenerator(pieces, grid);
+            generator = new TrackGenerator(pieces, grid, 10);
             track = generator.GenerateTrack();
             camera = new Camera(new Vector2(0,0), 1f);
 

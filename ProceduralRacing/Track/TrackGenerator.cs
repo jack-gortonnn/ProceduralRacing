@@ -10,15 +10,18 @@ public class TrackGenerator
     private Grid Grid;
 
     private WorldConnection currentConnection;
+    
+    public Random random;
 
-    public int GridOriginX = 10;
-    public int GridOriginY = 14;
+    private int GridOriginX = 10;
+    private int GridOriginY = 14;
 
-    public TrackGenerator(List<TrackPiece> availablePieces, Grid grid)
+    public TrackGenerator(List<TrackPiece> availablePieces, Grid grid, int seed)
     {
         PiecePool = availablePieces;
         Track = new List<PlacedPiece>();
         Grid = grid;
+        random = new Random(seed);
     }
 
     private void ResetState()
@@ -33,7 +36,6 @@ public class TrackGenerator
         ResetState();
 
         var startPiece = new PlacedPiece(GetPiece("5x1_grid"), 0, false, new Point(GridOriginX, GridOriginY));
-
         Grid.OccupyRectangle(startPiece.GridPosition, startPiece.TransformedSize);
         Track.Add(startPiece);
 
@@ -43,18 +45,26 @@ public class TrackGenerator
             startExit.Direction
         );
 
-        if (TryFindPlacement(GetPiece("2x2_singaporesling"), rotation: 1, flipped: false, out var placed, out var exit))
+        for (int i = 0; i < Constants.MaxTrackLength; i++)
         {
-            AddPiece(placed, exit);
-        }
+            var randomPiece = PiecePool[random.Next(PiecePool.Count)];
 
-        if (TryFindPlacement(GetPiece("2x2_singaporesling"), rotation: 3, flipped: false, out var placed2, out var exit2))
-        {
-            AddPiece(placed2, exit2);
+            int rotation = random.Next(4);
+            bool flipped = random.Next(2) == 0;
+
+            if (TryFindPlacement(randomPiece, rotation, flipped, out var placed, out var exit))
+            {
+                AddPiece(placed, exit);
+            }
+            else
+            {
+                continue;
+            }
         }
 
         return Track;
     }
+
 
     public bool TryFindPlacement(TrackPiece piece, int rotation, bool flipped, out PlacedPiece placed, out Connection exit)
     {
