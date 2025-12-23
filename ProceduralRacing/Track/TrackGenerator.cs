@@ -117,6 +117,20 @@ public class TrackGenerator
         return exit != null;
     }
 
+    private bool CanCloseTrack(PlacedPiece candidate, Connection candidateExit)
+    {
+        var startEntry = Track[0].TransformedConnections[0];
+
+        Point candidateWorldPos =
+            candidate.GridPosition + candidateExit.Position + candidateExit.Direction;
+
+        Point startWorldPos =
+            Track[0].GridPosition + startEntry.Position + startEntry.Direction;
+
+        return candidateWorldPos == startWorldPos
+            && candidateExit.IsOpposite(startEntry.Direction);
+    }
+
     public void AddPiece(PlacedPiece piece, Connection exit)
     {
         Grid.OccupyRectangle(piece.GridPosition, piece.TransformedSize);
