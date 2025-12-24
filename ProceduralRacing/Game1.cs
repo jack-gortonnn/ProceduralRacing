@@ -62,6 +62,8 @@ namespace ProceduralRacing
                 piece.Texture = Content.Load<Texture2D>($"textures/{piece.Name}");
             }
 
+            PieceLibrary.StartingPiece.Texture = Content.Load<Texture2D>($"textures/{PieceLibrary.StartingPiece.Name}");
+
             font = Content.Load<SpriteFont>("fonts/Arial");
 
             pixel = new Texture2D(GraphicsDevice, 1, 1);

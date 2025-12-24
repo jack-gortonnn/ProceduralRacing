@@ -71,7 +71,7 @@ public class Grid
             {
                 Point cell = new(x, y);
                 bool occupiedCell = IsOccupied(cell);
-                Color fillColor = occupiedCell ? Color.Red * 0.5f : Color.Green * 0.05f;
+                Color fillColor = occupiedCell ? Color.DarkRed * 0.5f : Color.Green * 0.1f;
 
                 spriteBatch.Draw(pixel, ToWorldPosition(cell), null, fillColor, 0f,
                     Vector2.Zero, new Vector2(TileSize, TileSize), SpriteEffects.None, 0f); 

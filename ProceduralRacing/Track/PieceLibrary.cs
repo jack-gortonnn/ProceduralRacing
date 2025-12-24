@@ -1,13 +1,16 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
-public static class PieceLibrary
+using System.Diagnostics;
+using System.Linq;
+public class PieceLibrary
 {
-    public static List<TrackPiece> All = new List<TrackPiece>()
-    {
-        new TrackPiece("5x1_grid", new Point(5,1), TrackType.Grid, new List<Connection>{
+    public static TrackPiece StartingPiece = 
+        new TrackPiece("5x1_grid", new Point(5, 1), TrackType.Grid, new List<Connection>{
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(4,0), new Point(1,0))
-        }),
+    });
+    public static List<TrackPiece> All = new List<TrackPiece>()
+    {
         new TrackPiece("1x1_straight", new Point(1,1), TrackType.Straight, new List<Connection>{
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(0,0), new Point(1,0))
@@ -169,4 +172,39 @@ public static class PieceLibrary
             new Connection(new Point(4,1), new Point(1,0))
         }),
     };
+    public static List<(TrackPiece, int, bool, List<Connection>)> PrecomputeUniqueTransforms(List<TrackPiece> pieces)
+    {
+        var precomputedUniqueTransforms = new List<(TrackPiece, int, bool, List<Connection>)>();
+        var seenSignatures = new HashSet<string>();
+
+        foreach (var piece in pieces)
+        {
+            for (int rotation = 0; rotation < 4; rotation++)
+            {
+                for (int flip = 0; flip < 2; flip++)
+                {
+                    bool flipped = flip == 1;
+                    var connections = piece.GetTransformedConnections(rotation, flipped);
+
+                    // Create a unique signature for this layout of connections
+                    string signature = string.Join("|",
+                        connections
+                            .OrderBy(c => c.Position.X)
+                            .ThenBy(c => c.Position.Y)
+                            .ThenBy(c => c.Direction.X)
+                            .ThenBy(c => c.Direction.Y)
+                            .Select(c => $"{c.Position.X},{c.Position.Y}:{c.Direction.X},{c.Direction.Y}")
+                    );
+
+                    // Only add if we haven't seen this exact connection layout before for this piece
+                    if (seenSignatures.Add(piece.Name + "_" + signature))
+                    {
+                        precomputedUniqueTransforms.Add((piece, rotation, flipped, connections));
+                    }
+                }
+            }
+        }
+
+        return precomputedUniqueTransforms;
+    }
 }
