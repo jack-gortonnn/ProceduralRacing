@@ -21,6 +21,8 @@ namespace ProceduralRacing
         private Random random = new Random();
         private int seed;
 
+        private float timer = 0f;
+
         private Texture2D pixel;
         private SpriteFont font;
 
@@ -44,8 +46,9 @@ namespace ProceduralRacing
             grid = new Grid(minX: 0, maxX: 25, minY: 0, maxY: 25, tileSize: Constants.TileSize);
             pieces = PieceLibrary.All;
             generator = new TrackGenerator(pieces, grid, seed);
-            track = generator.GenerateTrack();
             camera = new Camera(new Vector2(0,0), 1f);
+
+            generator.GenerateTrack();
 
             base.Initialize();
         }
@@ -54,9 +57,9 @@ namespace ProceduralRacing
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            foreach (var piece in track)
+            foreach (var piece in pieces)
             {
-                piece.BasePiece.Texture = Content.Load<Texture2D>($"textures/{piece.BasePiece.Name}");
+                piece.Texture = Content.Load<Texture2D>($"textures/{piece.Name}");
             }
 
             font = Content.Load<SpriteFont>("fonts/Arial");
@@ -80,6 +83,23 @@ namespace ProceduralRacing
             if (kb.IsKeyDown(Keys.Q)) camera.AddZoom(-0.01f);
             if (kb.IsKeyDown(Keys.E)) camera.AddZoom(0.01f);
 
+            if (kb.IsKeyDown(Keys.R))
+            {
+                seed = random.Next(1, 9999999);
+                generator = new TrackGenerator(pieces, grid, seed);
+                generator.GenerateTrack();
+            }
+
+            if (timer > Constants.SecondsPerStep)
+            {
+                generator.Update(gameTime);
+                timer = 0f;
+            }
+            else
+            {
+                timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
+
             base.Update(gameTime);
         }
 
@@ -91,6 +111,7 @@ namespace ProceduralRacing
 
             grid.Draw(spriteBatch, pixel);
 
+            track = generator.Track;
             foreach (var piece in track)
             {
                 piece.Draw(spriteBatch);

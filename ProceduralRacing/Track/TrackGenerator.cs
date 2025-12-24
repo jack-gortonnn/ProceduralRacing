@@ -6,7 +6,7 @@ using System.Linq;
 public class TrackGenerator
 {
     private List<TrackPiece> PiecePool;
-    private List<PlacedPiece> Track;
+    public List<PlacedPiece> Track;
     private Grid Grid;
 
     private WorldConnection currentConnection;
@@ -31,7 +31,7 @@ public class TrackGenerator
         currentConnection = default;
     }
 
-    public List<PlacedPiece> GenerateTrack()
+    public void GenerateTrack()
     {
         ResetState();
 
@@ -44,8 +44,11 @@ public class TrackGenerator
             startPiece.GridPosition + startExit.Position + startExit.Direction,
             startExit.Direction
         );
+    }
 
-        for (int i = 0; i < Constants.MaxTrackLength; i++)
+    public void Update(GameTime gameTime)
+    {
+        if (Track.Count <= Constants.MaxTrackLength)
         {
             var randomPiece = PiecePool[random.Next(PiecePool.Count)];
 
@@ -56,15 +59,8 @@ public class TrackGenerator
             {
                 AddPiece(placed, exit);
             }
-            else
-            {
-                continue;
-            }
         }
-
-        return Track;
     }
-
 
     public bool TryFindPlacement(TrackPiece piece, int rotation, bool flipped, out PlacedPiece placed, out Connection exit)
     {
