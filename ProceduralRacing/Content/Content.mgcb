@@ -13,6 +13,13 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin fonts/Arial.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:fonts/Arial.spritefont
+
 #begin textures/1x1_straight.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -36,6 +43,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:textures/1x1_turn.png
+
+#begin textures/2x1_chicane.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:textures/2x1_chicane.png
 
 #begin textures/2x1_hairpin.png
 /importer:TextureImporter

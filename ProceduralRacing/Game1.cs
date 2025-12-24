@@ -13,12 +13,16 @@ namespace ProceduralRacing
         private SpriteBatch spriteBatch;
 
         private Camera camera;
+        private Grid grid;
         private TrackGenerator generator;
         private List<PlacedPiece> track;
         private List<TrackPiece> pieces;
 
+        private Random random = new Random();
+        private int seed;
+
         private Texture2D pixel;
-        private Grid grid;
+        private SpriteFont font;
 
         private Vector2 worldOffset = new Vector2(0,0);
 
@@ -36,23 +40,12 @@ namespace ProceduralRacing
 
         protected override void Initialize()
         {
+            seed = random.Next(1, 9999999);
             grid = new Grid(minX: 0, maxX: 25, minY: 0, maxY: 25, tileSize: Constants.TileSize);
             pieces = PieceLibrary.All;
-            generator = new TrackGenerator(pieces, grid, 10);
+            generator = new TrackGenerator(pieces, grid, seed);
             track = generator.GenerateTrack();
             camera = new Camera(new Vector2(0,0), 1f);
-
-            // Mark occupied cells in grid
-            foreach (var piece in track)
-            {
-                grid.OccupyRectangle(piece.GridPosition, piece.TransformedSize);
-
-                Debug.WriteLine($"Placed {piece.BasePiece.Name} at {piece.GridPosition} | Rotation: {piece.Rotation * 90}° | Flipped: {piece.IsFlipped}");
-                foreach (var conn in piece.TransformedConnections)
-                {
-                    Debug.WriteLine($"   Connection: Pos={conn.Position} Dir={conn.Direction}");
-                }
-            }
 
             base.Initialize();
         }
@@ -65,6 +58,8 @@ namespace ProceduralRacing
             {
                 piece.BasePiece.Texture = Content.Load<Texture2D>($"textures/{piece.BasePiece.Name}");
             }
+
+            font = Content.Load<SpriteFont>("fonts/Arial");
 
             pixel = new Texture2D(GraphicsDevice, 1, 1);
             pixel.SetData(new[] { Color.White });
@@ -100,6 +95,8 @@ namespace ProceduralRacing
             {
                 piece.Draw(spriteBatch);
             }
+
+            spriteBatch.DrawString(font, $"Seed {seed}", new Vector2(10, 10), Color.White);
 
             spriteBatch.End();
             base.Draw(gameTime);

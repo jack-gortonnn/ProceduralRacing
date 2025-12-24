@@ -112,6 +112,10 @@ public static class PieceLibrary
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(0,2), new Point(-1,0))
         }),
+        new TrackPiece("2x1_chicane", new Point(2,1), TrackType.Chicane, new List<Connection>{
+            new Connection(new Point(0,0), new Point(0,-1)),
+            new Connection(new Point(1,0), new Point(0,1))
+        }),
         new TrackPiece("2x2_smoothchicane", new Point(2,2), TrackType.Chicane, new List<Connection>{
             new Connection(new Point(0,0), new Point(0,-1)),
             new Connection(new Point(1,1), new Point(0,1))

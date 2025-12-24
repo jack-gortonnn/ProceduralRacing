@@ -51,10 +51,8 @@ public class Grid
         for (int x = 0; x < size.X; x++)
             for (int y = 0; y < size.Y; y++)
             {
-                if (IsOccupied(new Point(topLeft.X + x, topLeft.Y + y)))
-                    return true;
+                if (IsOccupied(new Point(topLeft.X + x, topLeft.Y + y))) return true;
             }
-
         return false;
     }
 
@@ -67,9 +65,6 @@ public class Grid
 
     public void Draw(SpriteBatch spriteBatch, Texture2D pixel)
     {
-        if (spriteBatch == null || pixel == null) return;
-
-        // Draw cells
         for (int x = MinX; x <= MaxX; x++)
         {
             for (int y = MinY; y <= MaxY; y++)
@@ -83,21 +78,17 @@ public class Grid
             }
         }
 
-        // Draw vertical grid lines
         Color lineColor = Color.White * 0.25f;
         for (int x = MinX; x <= MaxX + 1; x++)
         {
             Vector2 pos = ToWorldPosition(new Point(x, MinY));
-            spriteBatch.Draw(pixel, pos, null, lineColor, 0f,
-                Vector2.Zero, new Vector2(1, (MaxY - MinY + 1) * TileSize), SpriteEffects.None, 0f);
+            spriteBatch.Draw(pixel, pos, null, lineColor, 0f, Vector2.Zero, new Vector2(1, (MaxY - MinY + 1) * TileSize), SpriteEffects.None, 0f);
         }
 
-        // Draw horizontal grid lines
         for (int y = MinY; y <= MaxY + 1; y++)
         {
             Vector2 pos = ToWorldPosition(new Point(MinX, y));
-            spriteBatch.Draw(pixel, pos, null, lineColor, 0f,
-                Vector2.Zero, new Vector2((MaxX - MinX + 1) * TileSize, 1), SpriteEffects.None, 0f);
+            spriteBatch.Draw(pixel, pos, null, lineColor, 0f, Vector2.Zero, new Vector2((MaxX - MinX + 1) * TileSize, 1), SpriteEffects.None, 0f);
         }
     }
 }
