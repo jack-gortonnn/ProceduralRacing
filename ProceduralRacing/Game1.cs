@@ -119,6 +119,7 @@ namespace ProceduralRacing
                 piece.Draw(spriteBatch);
             }
 
+
             spriteBatch.DrawString(font, $"Seed {seed}", new Vector2(10, 10), Color.White);
 
             spriteBatch.End();

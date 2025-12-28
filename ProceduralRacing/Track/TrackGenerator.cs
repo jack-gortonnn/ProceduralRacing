@@ -11,7 +11,7 @@ public class TrackGenerator
     private Grid Grid;
 
     private WorldConnection currentConnection;
-    
+
     public Random random;
 
     private int GridOriginX = 10;
@@ -30,7 +30,6 @@ public class TrackGenerator
 
         Debug.WriteLine($"Precomputed {uniquePieces.Count} unique transformations (from {PieceLibrary.All.Count * 8} total possible)");
     }
-
 
     private void ResetState()
     {
@@ -56,26 +55,29 @@ public class TrackGenerator
 
     public void Update(GameTime gameTime)
     {
-        if (Track.Count >= Constants.MaxTrackLength) return;
+        if (Track.Count >= Constants.MaxTrackLength)
+            return;
 
-        var validCandidates = GetValidCandidates();
+        var candidates = GetValidCandidates();
+        if (candidates.Count == 0)
+            return;
 
-        if (validCandidates.Count == 0) return;
+        // Pick the candidate with the highest score
+        var chosen = candidates.OrderByDescending(c => c.score).First();
 
-        var (placed, exit) = validCandidates[random.Next(validCandidates.Count)];
-
-        AddPiece(placed, exit);
+        AddPiece(chosen.placed, chosen.exit);
     }
 
-    private List<(PlacedPiece placed, Connection exit)> GetValidCandidates()
+    private List<(PlacedPiece placed, Connection exit, float score)> GetValidCandidates()
     {
-        var valid = new List<(PlacedPiece placed, Connection exit)>();
+        var valid = new List<(PlacedPiece, Connection, float)>();
 
         foreach (var (piece, rotation, flipped, connections) in uniquePieces)
         {
             if (TryFindPlacement(piece, rotation, flipped, out var placed, out var exit))
             {
-                valid.Add((placed, exit));
+                float score = ScorePiece(placed, placed.TransformedConnections);
+                valid.Add((placed, exit, score));
             }
         }
 
@@ -89,30 +91,34 @@ public class TrackGenerator
 
         var connections = piece.GetTransformedConnections(rotation, flipped);
 
-        // 1. Find a valid entry connection
         if (!HasValidEntry(connections, out var entry))
             return false;
 
-        // 2. Make a placement based on that entry and see if it fits
         var candidate = new PlacedPiece(piece, rotation, flipped, currentConnection.GridPosition - entry.Position);
+
         if (!HasValidPlacement(candidate))
             return false;
 
-        // 3. Find a valid exit connection that leads to empty space
-        if (!HasValidExitOrClosesTrack(connections, entry, candidate, out exit))
+        if (!HasValidExit(connections, entry, candidate, out exit) && !HasClosingExit(connections, candidate, out exit))
             return false;
 
         placed = candidate;
         return true;
     }
 
-    // ----- Helpers -----
-
-    private TrackPiece GetPiece(string name)
+    private float ScorePiece(PlacedPiece piece, List<Connection> connections)
     {
-        return PiecePool.FirstOrDefault(p => p.Name == name);
+        float score = 0f;
+
+        if (HasClosingExit(connections, piece, out _))
+            score += 1000f;
+
+        score += (float)(random.NextDouble() * 0.5);
+
+        return score;
     }
 
+    // ----- Helpers -----
     private bool HasValidEntry(List<Connection> connections, out Connection entry)
     {
         entry = connections.FirstOrDefault(c => c.IsOpposite(currentConnection.Direction));
@@ -121,24 +127,37 @@ public class TrackGenerator
 
     private bool HasValidPlacement(PlacedPiece p)
     {
-        bool valid = Grid.IsRectangleInBounds(p.GridPosition, p.TransformedSize)
-                 && !Grid.IsRectangleOccupied(p.GridPosition, p.TransformedSize);
-        return valid;
+        return Grid.IsRectangleInBounds(p.GridPosition, p.TransformedSize) &&
+               !Grid.IsRectangleOccupied(p.GridPosition, p.TransformedSize);
     }
 
-    private bool HasValidExitOrClosesTrack(List<Connection> connections, Connection entry, PlacedPiece candidate, out Connection exit)
+    private bool HasValidExit(List<Connection> connections, Connection entry, PlacedPiece candidate, out Connection exit)
     {
-        var startEntry = Track[0].TransformedConnections[0];
-
-        Point startWorldPos = Track[0].GridPosition + startEntry.Position + startEntry.Direction;
-
-        exit = connections.FirstOrDefault(c => c != entry && (c.LeadsToEmptySpace(candidate.GridPosition, Grid)                   // Exit is not entry and leads to empty space
-                || (candidate.GridPosition + c.Position + c.Direction == startWorldPos && c.IsOpposite(startEntry.Direction))));  // Or exit connects back to start piece
+        exit = connections.FirstOrDefault(c =>
+        {
+            if (c == entry) return false;
+            return c.LeadsToEmptySpace(candidate.GridPosition, Grid);
+        });
 
         return exit != null;
     }
 
+    private bool HasClosingExit(List<Connection> connections, PlacedPiece candidate, out Connection exit)
+    {
+        var startEntry = Track[0].TransformedConnections[0];
+        Point startWorldPos = Track[0].GridPosition + startEntry.Position;
 
+        exit = connections.FirstOrDefault(c =>
+        {
+            Point candidateWorldPos = candidate.GridPosition + c.Position;
+            Point adjacentPos = candidateWorldPos + c.Direction;
+
+            // Match if adjacent along direction and opposite directions
+            return adjacentPos == startWorldPos && c.IsOpposite(startEntry.Direction);
+        });
+
+        return exit != null;
+    }
 
     public void AddPiece(PlacedPiece piece, Connection exit)
     {
