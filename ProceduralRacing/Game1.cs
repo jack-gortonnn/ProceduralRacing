@@ -48,7 +48,7 @@ namespace ProceduralRacing
             generator = new TrackGenerator(pieces, grid, seed);
             camera = new Camera(new Vector2(0,0), 1f);
 
-            generator.GenerateTrack();
+            generator.BeginTrack();
 
             base.Initialize();
         }
@@ -89,7 +89,7 @@ namespace ProceduralRacing
             {
                 seed = random.Next(1, 9999999);
                 generator = new TrackGenerator(pieces, grid, seed);
-                generator.GenerateTrack();
+                generator.BeginTrack();
             }
 
             if (timer > Constants.SecondsPerStep)

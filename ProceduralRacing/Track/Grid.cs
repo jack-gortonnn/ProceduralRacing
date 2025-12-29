@@ -56,12 +56,19 @@ public class Grid
         return false;
     }
 
+    public bool IsInBounds(Point cell)
+    {
+        return cell.X >= MinX && cell.X <= MaxX &&
+               cell.Y >= MinY && cell.Y <= MaxY;
+    }
+
     public bool IsRectangleInBounds(Point topLeft, Point size)
     {
-        return topLeft.X >= MinX && topLeft.Y >= MinY &&
-               (topLeft.X + size.X - 1) <= MaxX &&
-               (topLeft.Y + size.Y - 1) <= MaxY;
+        return IsInBounds(topLeft) &&
+               IsInBounds(new Point(topLeft.X + size.X - 1, topLeft.Y + size.Y - 1));
     }
+
+
 
     public void Draw(SpriteBatch spriteBatch, Texture2D pixel)
     {
