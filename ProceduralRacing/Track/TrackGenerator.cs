@@ -18,7 +18,7 @@ public class TrackGenerator
     {
         Track = new List<PlacedPiece>();
         Grid = grid;
-        random = new Random(7714948);
+        random = new Random(seed);
         uniquePieces = PieceLibrary.PrecomputeUniqueTransforms(availablePieces);
     }
 
@@ -68,6 +68,7 @@ public class TrackGenerator
     private float ScorePiece(TrackPiece piece, int rotation, bool flipped, out PlacedPiece placed, out Connection exit)
     {
         float score = 50f;
+        float progress = Track.Count / (float)Constants.MaxTrackLength;
 
         // 1. Does it have a valid placement? If not, it scores 0.
         if (!TryFindPlacement(piece, rotation, flipped, out placed, out exit)) return 0f;
@@ -81,11 +82,14 @@ public class TrackGenerator
         // 4. Is it the same type as the last piece? If it is, subtract 25.
         if ((Track.Count > 0) && Track[^1].BasePiece.Type == piece.Type) score -= 25f;
 
-        // 6. Does it get us back to the start? If it does, add up to 50.
-        score += Math.Max(0f, 50f - DistanceToStart(placed, exit));
+        // 5. Does it initially lead away from the start? Stronger reward early (up to 5)
+        score += Math.Min(5f, DistanceToStart(placed, exit)) * (1f - progress);
+
+        // 6. Does it bring us home towards the end? Stronger reward late (up to 100)
+        score += (100f - Math.Min(100f, DistanceToStart(placed, exit))) * progress;
 
         // 7. Add enough random noise to tiebreak but not to choose 'bad' pieces
-        score += (float)(random.NextDouble() * 2);
+        score += (float)random.NextDouble();
 
         // 8. Return non-negative score
         return Math.Max(0f, score);
