@@ -19,10 +19,14 @@ public class Connection
     {
         return Direction == new Point(-other.X, -other.Y);
     }
+
+    public Point GetNextCell(Point worldPos)
+    {
+        return worldPos + this.Position + this.Direction;
+    }
     public bool LeadsToEmptySpace(Point pieceGridPos, Grid grid)
     {
-        Point worldPos = pieceGridPos + this.Position + this.Direction;
-        return !grid.IsOccupied(worldPos);
+        return !grid.IsOccupied(GetNextCell(pieceGridPos));
     }
 }
 

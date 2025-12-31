@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 
@@ -8,10 +9,9 @@ public class TrackGenerator
 {
     public List<PlacedPiece> Track;
     private Grid Grid;
-    private WorldConnection currentConnection;
+    public WorldConnection currentConnection;
+    public WorldConnection startConnection;
     public Random random;
-    private Point startPos;
-    private Point startDir;
     private List<(TrackPiece piece, int rotation, bool flipped, List<Connection> connections)> uniquePieces;
 
     public TrackGenerator(List<TrackPiece> availablePieces, Grid grid, int seed)
@@ -32,8 +32,8 @@ public class TrackGenerator
         var startEntry = startPiece.TransformedConnections[0];
         var startExit = startPiece.TransformedConnections[1];
 
-        startPos = startPiece.GridPosition + startEntry.Position + startEntry.Direction;
-        startDir = startEntry.Direction;
+        startConnection = new WorldConnection(startPiece.GridPosition + startEntry.Position,
+                                              startEntry.Direction);
 
         AddPiece(startPiece, startExit);
     }
@@ -83,13 +83,13 @@ public class TrackGenerator
         if ((Track.Count > 0) && Track[^1].BasePiece.Type == piece.Type) score -= 25f;
 
         // 5. Does it initially lead away from the start? Stronger reward early (up to 5)
-        score += Math.Min(5f, DistanceToStart(placed, exit)) * (1f - progress);
+        score += Math.Min(5f, ManhattanToStart(placed, exit)) * (1f - progress);
 
-        // 6. Does it bring us home towards the end? Stronger reward late (up to 100)
-        score += (100f - Math.Min(100f, DistanceToStart(placed, exit))) * progress;
+        // 6. Does it bring us home towards the end? Stronger reward late (up to 500)
+        score += (500f - Math.Min(100f, ManhattanToStart(placed, exit))) * progress;
 
         // 7. Add enough random noise to tiebreak but not to choose 'bad' pieces
-        score += (float)random.NextDouble();
+        score += (float)random.NextDouble() * 5f;
 
         // 8. Return non-negative score
         return Math.Max(0f, score);
@@ -105,16 +105,19 @@ public class TrackGenerator
         // 1. Does it have a valid entry point?
         if (!HasValidEntry(connections, out var entry)) return false;
 
-        // 2. If it does, make a placement based on that entry
-        var candidate = new PlacedPiece(piece, rotation, flipped, currentConnection.GridPosition - entry.Position);
+        // 2. Find the grid position based on that entry point and the current world connection
+        var gridPos = currentConnection.GridPosition - (entry.Position + entry.Direction);
 
-        // 3. Does this new placement fit in the grid?
-        if (!HasValidPlacement(candidate)) return false;
+        // 3. Make a placement based on that entry grid position
+        var placement = new PlacedPiece(piece, rotation, flipped, gridPos);
 
-        // 4. If it fits, does it have a valid exit point?
-        if (!HasValidExit(candidate, entry, out exit)) return false;
+        // 4. Does this new placement fit in the grid?
+        if (!HasValidPlacement(placement)) return false;
 
-        placed = candidate;
+        // 5. If it fits, does it have a valid exit point?
+        if (!HasValidExit(placement, entry, out exit)) return false;
+
+        placed = placement;
         return true;
     }
 
@@ -140,8 +143,8 @@ public class TrackGenerator
 
     private bool IsClosingExit(Connection candidateExit, PlacedPiece candidate)
     { // Checks if the candidate exit connects back to the start position and direction
-        bool isClosing = (candidate.GridPosition + candidateExit.Position == startPos) && candidateExit.IsOpposite(startDir);
-        return isClosing;
+        return candidateExit.GetNextCell(candidate.GridPosition) == startConnection.GridPosition &&
+               candidateExit.IsOpposite(startConnection.Direction);
     }
 
     private bool HasValidExit(PlacedPiece candidate, Connection entry, out Connection exit)
@@ -155,12 +158,13 @@ public class TrackGenerator
     { // Adds the piece to the track and updates the grid and current connection
         Track.Add(piece);
         Grid.OccupyRectangle(piece.GridPosition, piece.TransformedSize);
-        currentConnection = new WorldConnection(piece.GridPosition + exit.Position + exit.Direction, exit.Direction);
+        currentConnection = new WorldConnection(piece.GridPosition + exit.Position,
+                                                exit.Direction);
     }
 
-    private float DistanceToStart(PlacedPiece placed, Connection exit)
+    private float ManhattanToStart(PlacedPiece placed, Connection exit)
     { // Calculates Manhattan distance from the exit of the placed piece to the start position
         var candidateWorldPos = placed.GridPosition + exit.Position;
-        return Math.Abs(candidateWorldPos.X - startPos.X) + Math.Abs(candidateWorldPos.Y - startPos.Y);
+        return Math.Abs(candidateWorldPos.X - startConnection.GridPosition.X) + Math.Abs(candidateWorldPos.Y - startConnection.GridPosition.Y);
     }
 }
