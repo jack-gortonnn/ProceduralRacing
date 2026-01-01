@@ -6,6 +6,8 @@ public class Constants
     public const int MaxTrackLength = 50;
     public const float SecondsPerStep = 0.0001f;
 
+    public const int OptionPoolSize = 3;
+
     public const int TrackOriginX = 10;
     public const int TrackOriginY = 14;
 }

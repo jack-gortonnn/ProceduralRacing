@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 public class Connection
 {
-    public Point Position { get; set; }
-    public Point Direction { get; set; }
+    public Point Position { get; set; }     // Position relative to the piece's top-left corner
+    public Point Direction { get; set; }    // Direction the track is heading
 
     public Connection(Point position, Point direction)
     {

@@ -9,9 +9,13 @@ public class PlacedPiece
     public int Rotation { get; }
     public bool IsFlipped { get; }
     public Point GridPosition { get; }
-
     public Point TransformedSize { get; }
     public List<Connection> TransformedConnections { get; }
+
+    // Quick hack to store remaining candidate options for this piece during generation
+    // Ideally this wouldn't be here but i want to avoid creating another class just for generation state
+    public List<Candidate> RemainingOptions { get; set; } = new List<Candidate>();
+    public Connection UsedExitConnection { get; set; }
 
     public PlacedPiece(TrackPiece basePiece, int rotation, bool isFlipped, Point gridPosition)
     {

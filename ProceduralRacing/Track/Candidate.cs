@@ -1,8 +1,10 @@
-﻿class Candidate
+﻿using System.Collections.Generic;
+
+public class Candidate
 {
-    public PlacedPiece Piece;
-    public Connection Exit;
-    public float Score;
+    public PlacedPiece Piece { get; }
+    public Connection Exit { get; }
+    public float Score { get; }
 
     public Candidate(PlacedPiece piece, Connection exit, float score)
     {
