@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using System;
 
 public class Grid
 {
@@ -69,6 +70,14 @@ public class Grid
     }
 
 
+    public bool RectangleContains(Point rectPosition, Point rectSize, Point point)
+    {
+        return point.X >= rectPosition.X &&
+               point.Y >= rectPosition.Y &&
+               point.X < rectPosition.X + rectSize.X &&
+               point.Y < rectPosition.Y + rectSize.Y;
+    }
+
 
     public void Draw(SpriteBatch spriteBatch, Texture2D pixel)
     {
@@ -81,7 +90,7 @@ public class Grid
                 Color fillColor = occupiedCell ? Color.DarkRed * 0.5f : Color.Green * 0.1f;
 
                 spriteBatch.Draw(pixel, ToWorldPosition(cell), null, fillColor, 0f,
-                    Vector2.Zero, new Vector2(TileSize, TileSize), SpriteEffects.None, 0f); 
+                    Vector2.Zero, new Vector2(TileSize, TileSize), SpriteEffects.None, 0f);
             }
         }
 

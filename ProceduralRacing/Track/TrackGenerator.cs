@@ -34,9 +34,14 @@ public class TrackGenerator
     // ---------------- TRACK GENERATION LOGIC ----------------
     // --------------------------------------------------------
 
-    // Every frame, we try to extend the track until it either closes or hits max length
-    // If we try all options from the current end and can't place anything, we backtrack
-    // When we backtrack, we remove the last piece and try new options from the new end
+    // How do we generate a track?
+    // 1. Start with a starting piece at a fixed location and orientation
+    // 2. From the current end of the track, score all possible next pieces and their placements
+    // 3. Select the best N options and store them as candidates for that end
+    // 4. Each frame, try to add the next candidate from the current end's options
+    // 5. If successful, refresh candidates for the new end and repeat
+    // 6. If no candidates are left, backtrack by removing the last piece and trying its next candidate
+    // 7. Continue until the track is closed or reaches max length
 
     public void Update(GameTime gameTime)
     { // Runs every frame and tries to extend track until it can't
@@ -71,33 +76,38 @@ public class TrackGenerator
     }
 
     private float ScorePiece(TrackPiece piece, int rotation, bool flipped, out PlacedPiece placed, out Connection exit)
-    { // Scores a piece placement based on various criteria
+    { // Scores a piece placement based on various heuristics
 
         float score = 50f;
         float progress = Track.Count / (float)Constants.MaxTrackLength;
 
-        // 1. Does it have a valid placement? If not, it scores 0.
+        // 1. Invalid placement (overlap, out of bounds, no valid entry/exit, or blocks start) returns 0
         if (!TryFindPlacement(piece, rotation, flipped, out placed, out exit)) return 0f;
 
-        // 2. Does it have an exit that connects with the start? If it does, add 1000.
+        // 2. Reward heavily if it closes the track
         if (IsClosingExit(exit, placed)) score += 1000f;
 
-        // 3. Is it the same as the last piece? If it is, subtract 50.
+        // 3. Penalize if it's the same piece as the last one placed
         if ((Track.Count > 0) && Track[^1].BasePiece == piece) score -= 50f;
 
-        // 4. Is it the same type as the last piece? If it is, subtract 25.
+        // 4. Penalize if it's the same type as the last one placed
         if ((Track.Count > 0) && Track[^1].BasePiece.Type == piece.Type) score -= 25f;
 
-        // 5. Does it initially lead away from the start? Stronger reward early (up to 5)
-        score += Math.Min(5f, ManhattanToStart(placed, exit)) * (1f - progress);
+        // 5. Calculate Manhattan distance to start from the exit
+        float manhattan = GetManhattanToHome(placed, exit);
 
-        // 6. Does it bring us home towards the end? Stronger reward late (up to 1000)
-        score += (1000f - Math.Min(1000f, ManhattanToStart(placed, exit))) * progress;
+        // 6. Reward moving away from start early on
+        score += GetEarlyBonus(manhattan, progress, 10f);
 
-        // 7. Add enough random noise to tiebreak but not to choose 'bad' pieces
-        score += (float)random.NextDouble() * 1f;
+        // 7. Reward moving closer to start later on
+        score += GetLateBonus(manhattan, progress, 1000f);
 
-        // 8. Return non-negative score
+        // 8. Reward/penalize based on direction alignment towards the start
+        score += GetAlignmentBonus(exit, placed, manhattan, progress, 100f);
+
+        // 9. Small random factor to add variability
+        score += (float)random.NextDouble() * 10f;
+
         return Math.Max(1f, score);
     }
 
@@ -106,11 +116,11 @@ public class TrackGenerator
 
         placed = null;
         exit = null;
+
         var connections = piece.GetTransformedConnections(rotation, flipped);
 
         // 1. Does it have a valid entry point?
-        if (!HasValidEntry(connections, out var entry))
-            return false;
+        if (!HasValidEntry(connections, out var entry)) return false;
 
         // 2. Find the grid position based on that entry point and the current world connection
         var gridPos = currentConnection.GridPosition - (entry.Position + entry.Direction);
@@ -119,12 +129,17 @@ public class TrackGenerator
         var placement = new PlacedPiece(piece, rotation, flipped, gridPos);
 
         // 4. Does this new placement fit in the grid?
-        if (!HasValidPlacement(placement))
-            return false;
+        if (!HasValidPlacement(placement)) return false;
 
-        // 5. If it fits, does it have a valid exit point?
-        if (!HasValidExit(placement, entry, out exit))
-            return false;
+        // 5. Does it have a valid exit that either closes the track or leads to empty space?
+        if (!HasValidExit(placement, entry, out exit)) return false;
+
+        // 6. Does it improperly occupy the critical return cell without closing?
+        if (OccupiesStartWithoutClosing(placement, exit)) return false;
+
+        // 7. Is the critical cell reachable from the exit (unless closing)?
+        if (!(IsAbleToReachStart((placement.GridPosition + exit.Position)
+                     + exit.Direction)|| IsClosingExit(exit, placement))) return false;
 
         placed = placement;
         return true;
@@ -209,14 +224,97 @@ public class TrackGenerator
         return exit.LeadsToEmptySpace(candidate.GridPosition, Grid);
     }
 
+    private bool IsAbleToReachStart(Point startPos)
+    { // Checks if the current exit still has a valid path to end via floodfill
+        Point critical = startConnection.GridPosition + startConnection.Direction;
+
+        var visited = new HashSet<Point>();
+        var queue = new Queue<Point>();
+        queue.Enqueue(startPos);
+        visited.Add(startPos);
+
+        int steps = 0;
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+            steps++;
+
+            if (current == critical) return true;
+
+            foreach (var dir in new[] { new Point(0, 1), new Point(0, -1), new Point(1, 0), new Point(-1, 0) })
+            {
+                var next = current + dir;
+                if (!visited.Contains(next) &&
+                    Grid.IsInBounds(next) &&
+                    !Grid.IsOccupied(next))
+                {
+                    visited.Add(next);
+                    queue.Enqueue(next);
+                }
+            }
+        }
+        return false;
+    }
+
     private float ManhattanToStart(PlacedPiece placed, Connection exit)
-    { // Calculates Manhattan distance from the exit of the placed piece to the start position
+    { // Calculates the Manhattan distance from the candidate exit to the start position
         var candidateWorldPos = placed.GridPosition + exit.Position;
-        return Math.Abs(candidateWorldPos.X - startConnection.GridPosition.X) + Math.Abs(candidateWorldPos.Y - startConnection.GridPosition.Y);
+        var startPos = startConnection.GridPosition;
+        return Math.Abs(candidateWorldPos.X - startPos.X) + Math.Abs(candidateWorldPos.Y - startPos.Y);
+    }
+
+    private bool OccupiesStartWithoutClosing(PlacedPiece candidate, Connection exit)
+    { // Checks if the current piece (when placed) will occupy the grid space adjacent to the start without closing the track
+        Point criticalCell = startConnection.GridPosition + startConnection.Direction;
+
+        bool occupiesAdjacent = Grid.RectangleContains(candidate.GridPosition, candidate.TransformedSize, criticalCell);
+        if (!occupiesAdjacent) return false;
+
+        return !IsClosingExit(exit, candidate);
+    }
+
+    private float GetManhattanToHome(PlacedPiece placed, Connection exit)
+    {
+        Point nextCell = placed.GridPosition + exit.Position + exit.Direction;
+        Point criticalCell = startConnection.GridPosition + startConnection.Direction;
+        return Math.Abs(criticalCell.X - nextCell.X) + Math.Abs(criticalCell.Y - nextCell.Y);
+    }
+
+
+    // --- Scoring Helpers ---
+
+    private float GetEarlyBonus(float manhattan, float progress, float maxBonus)
+    { // Rewards moving away from start early on
+        return Math.Min(maxBonus, manhattan) * (1f - progress);
+    }
+
+    private float GetLateBonus(float manhattan, float progress, float maxBonus)
+    { // Rewards moving closer to start later on
+        return (maxBonus - Math.Min(maxBonus, manhattan)) * progress;
+    }
+
+    private float GetAlignmentBonus(Connection exit, PlacedPiece placed, float manhattan, float progress, float maxBonus)
+    { // Rewards/penalises exit connection being in/out of alignment with start connection
+
+        if (manhattan <= 1f) return 0f;
+
+        Vector2 currentDir = new(exit.Direction.X, exit.Direction.Y);
+
+        Point nextCell = placed.GridPosition + exit.Position + exit.Direction;
+        Point criticalCell = startConnection.GridPosition + startConnection.Direction;
+
+        Vector2 toHome = Vector2.Normalize(new Vector2(criticalCell.X - nextCell.X,
+                                                       criticalCell.Y - nextCell.Y));
+
+        float alignment = Vector2.Dot(currentDir, toHome);
+
+        return alignment * maxBonus * progress;
     }
 
 
     // --- Track Management Helpers --- 
+
+
     public void BeginTrack()
     { // Initializes the track with the starting piece
 
