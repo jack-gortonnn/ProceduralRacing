@@ -45,7 +45,7 @@ namespace ProceduralRacing
             seed = random.Next(1, 9999999);
             grid = new Grid(minX: 0, maxX: 25, minY: 0, maxY: 25, tileSize: Constants.TileSize);
             pieces = PieceLibrary.All;
-            generator = new TrackGenerator(pieces, grid, seed);
+            generator = new TrackGenerator(grid, seed, TrackDifficulty.Easy);
             camera = new Camera(new Vector2(0,0), 1f);
 
             generator.BeginTrack();
@@ -85,12 +85,11 @@ namespace ProceduralRacing
             if (kb.IsKeyDown(Keys.Q)) camera.AddZoom(-0.01f);
             if (kb.IsKeyDown(Keys.E)) camera.AddZoom(0.01f);
 
-            if (kb.IsKeyDown(Keys.R))
-            {
-                seed = random.Next(1, 9999999);
-                generator = new TrackGenerator(pieces, grid, seed);
-                generator.BeginTrack();
-            }
+            // --- Difficulty selection via number keys ---
+            if (kb.IsKeyDown(Keys.D1)) SetDifficulty(TrackDifficulty.Easy);
+            if (kb.IsKeyDown(Keys.D2)) SetDifficulty(TrackDifficulty.Medium);
+            if (kb.IsKeyDown(Keys.D3)) SetDifficulty(TrackDifficulty.Hard);
+            if (kb.IsKeyDown(Keys.D4)) SetDifficulty(TrackDifficulty.Extreme);
 
             if (timer > Constants.SecondsPerStep)
             {
@@ -104,6 +103,15 @@ namespace ProceduralRacing
 
             base.Update(gameTime);
         }
+
+        // Helper function to reset generator with a new difficulty
+        private void SetDifficulty(TrackDifficulty difficulty)
+        {
+            seed = random.Next(1, 9999999); // new seed for this difficulty
+            generator = new TrackGenerator(grid, seed, difficulty);
+            generator.BeginTrack();
+        }
+
 
         protected override void Draw(GameTime gameTime)
         {

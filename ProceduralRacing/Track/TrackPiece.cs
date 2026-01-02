@@ -6,16 +6,18 @@ public class TrackPiece
 {
     public string Name { get; set; }
     public Point Size { get; set; }
-    public TrackType Type { get; }
+    public TrackType Type { get; set; }
+	public int Difficulty { get; set; }
     public List<Connection> Connections { get; set; }
 
     public Texture2D Texture { get; set; }
 
-    public TrackPiece(string name, Point size, TrackType type, List<Connection> connections)
+    public TrackPiece(string name, Point size, TrackType type, int difficulty, List<Connection> connections)
     {
         Name = name;
         Size = size;
         Type = type;
+		Difficulty = difficulty;
         Connections = connections;
     }
 
