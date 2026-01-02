@@ -1,10 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
+
+
+// Placed Pieces are track pieces that have a specific position, rotation, and flip state on the track grid.
+// They are the final result of the track generation process and are used for rendering and gameplay.
 
 public class PlacedPiece
 {
+    // --- Properties ---
     public TrackPiece BasePiece { get; }
     public int Rotation { get; }
     public bool IsFlipped { get; }
@@ -12,11 +16,11 @@ public class PlacedPiece
     public Point TransformedSize { get; }
     public List<Connection> TransformedConnections { get; }
 
-    // Quick hack to store remaining candidate options for this piece during generation
-    // Ideally this wouldn't be here but i want to avoid creating another class just for generation state
+    // --- Generation Helpers ---
     public List<Candidate> RemainingOptions { get; set; } = new List<Candidate>();
     public Connection UsedExitConnection { get; set; }
 
+    // --- Constructor ---
     public PlacedPiece(TrackPiece basePiece, int rotation, bool isFlipped, Point gridPosition)
     {
         BasePiece = basePiece;
@@ -25,12 +29,10 @@ public class PlacedPiece
         IsFlipped = isFlipped;
 
         TransformedSize = (Rotation % 2 == 0) ? BasePiece.Size : new Point(BasePiece.Size.Y, BasePiece.Size.X);
-
-        // Again, not ideal to have this logic here since we already call GTC in the generator
-        // I could maybe pass in the transformed connections from there instead but meh
-        TransformedConnections = BasePiece.GetTransformedConnections(Rotation, IsFlipped);
+        TransformedConnections = PieceLibrary.GetTransformedConnections(BasePiece, Rotation, IsFlipped);
     }
 
+    // --- Rendering ---
     public void Draw(SpriteBatch spriteBatch)
     {
         Vector2 drawPos = (GridPosition.ToVector2() * Constants.TileSize) + (TransformedSize.ToVector2() * 0.5f * Constants.TileSize);

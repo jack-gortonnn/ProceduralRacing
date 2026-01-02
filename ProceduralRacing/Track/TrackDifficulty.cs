@@ -10,8 +10,14 @@ public enum TrackDifficulty
     Extreme
 }
 
+// Track Config holds all configuration parameters for track generation based on difficulty level.
+// These parameters influence the length, complexity, and scoring of the generated track.
+
 public class TrackConfig
 {
+    // --- Difficulty ---
+    public TrackDifficulty Difficulty;
+
     // --- Track limits ---
     public int MaxLength;           // maximum number of pieces in the track
     public int MinLength;           // minimum number of pieces before closure is allowed
@@ -36,72 +42,76 @@ public class TrackConfig
             case TrackDifficulty.Easy:
                 return new TrackConfig
                 {
+                    Difficulty = difficulty,
                     MaxLength = 15,
                     MinLength = 6,
-                    OptionPoolSize = 3,
+                    OptionPoolSize = 2,
                     MaxAttempts = 200,
                     BaseScore = 100f,
                     CloseLoopBonus = 2000f,
                     SamePiecePenalty = 20f,
                     SameTypePenalty = 10f,
-                    MaxEarlyBonus = 15f,
-                    MaxLateBonus = 1500f,
+                    MaxEarlyBonus = 10f,
+                    MaxLateBonus = 700f,
                     AlignmentBonus = 150f,
-                    Randomness = 20f,
+                    Randomness = 13f,
                     MaxPieceDifficulty = 1
                 };
 
             case TrackDifficulty.Medium:
                 return new TrackConfig
                 {
-                    MaxLength = 25,
-                    MinLength = 8,
-                    OptionPoolSize = 5,
+                    Difficulty = difficulty,
+                    MaxLength = 20,
+                    MinLength = 10,
+                    OptionPoolSize = 3,
                     MaxAttempts = 200,
-                    BaseScore = 50f,
+                    BaseScore = 90f,
                     CloseLoopBonus = 1000f,
                     SamePiecePenalty = 50f,
                     SameTypePenalty = 25f,
-                    MaxEarlyBonus = 10f,
-                    MaxLateBonus = 1000f,
+                    MaxEarlyBonus = 20f,
+                    MaxLateBonus = 600f,
                     AlignmentBonus = 100f,
-                    Randomness = 10f,
+                    Randomness = 25f,
                     MaxPieceDifficulty = 2
                 };
 
             case TrackDifficulty.Hard:
                 return new TrackConfig
                 {
-                    MaxLength = 35,
-                    MinLength = 10,
-                    OptionPoolSize = 7,
+                    Difficulty = difficulty,
+                    MaxLength = 30,
+                    MinLength = 15,
+                    OptionPoolSize = 4,
                     MaxAttempts = 200,
-                    BaseScore = 40f,
+                    BaseScore = 80f,
                     CloseLoopBonus = 600f,
                     SamePiecePenalty = 75f,
                     SameTypePenalty = 40f,
-                    MaxEarlyBonus = 6f,
-                    MaxLateBonus = 600f,
+                    MaxEarlyBonus = 30f,
+                    MaxLateBonus = 500f,
                     AlignmentBonus = 60f,
-                    Randomness = 2f,
+                    Randomness = 50f,
                     MaxPieceDifficulty = 3
                 };
 
             case TrackDifficulty.Extreme:
                 return new TrackConfig
                 {
+                    Difficulty = difficulty,
                     MaxLength = 50,
-                    MinLength = 12,
-                    OptionPoolSize = 9,
+                    MinLength = 20,
+                    OptionPoolSize = 5,
                     MaxAttempts = 200,
-                    BaseScore = 30f,
+                    BaseScore = 70f,
                     CloseLoopBonus = 400f,
                     SamePiecePenalty = 100f,
                     SameTypePenalty = 60f,
-                    MaxEarlyBonus = 5f,
+                    MaxEarlyBonus = 40f,
                     MaxLateBonus = 400f,
                     AlignmentBonus = 50f,
-                    Randomness = 1f,
+                    Randomness = 100f,
                     MaxPieceDifficulty = 4
                 };
 
@@ -111,9 +121,24 @@ public class TrackConfig
     }
 
     public List<TrackPiece> GetAllowedPieces()
-    {
+    { // Return list of pieces allowed based on max piece difficulty
         return PieceLibrary.All
             .Where(p => p.Difficulty <= MaxPieceDifficulty)
             .ToList();
     }
+
+    private static readonly Dictionary<TrackDifficulty, Dictionary<int, float>> RatingBonuses = new()
+    { // Dictionary of rating bonuses based on track difficulty and piece rating
+        [TrackDifficulty.Easy] = new() { [1] = 50f }, 
+        [TrackDifficulty.Medium] = new() { [1] = 25f, [2] = 50f },
+        [TrackDifficulty.Hard] = new() { [1] = 13f, [2] = 25f, [3] = 50f },
+        [TrackDifficulty.Extreme] = new() { [1] = 6f, [2] = 13f, [3] = 25f, [4] = 50f }
+    };
+
+    public float GetRatingBonus(int pieceRating)
+    { // Get rating bonus for a piece based on its rating and track difficulty
+        return RatingBonuses.TryGetValue(Difficulty, out var bonuses) &&
+               bonuses.TryGetValue(pieceRating, out var bonus) ? bonus : 0f;
+    }
+
 }

@@ -1,10 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Data;
+
 public class Constants
 {
     public const int TileSize = 64;
     public const int MaxTrackLength = 50;
-    public const float SecondsPerStep = 0.0001f;
+    public const float SecondsPerStep = 0.00001f;
 
     public const int OptionPoolSize = 3;
 

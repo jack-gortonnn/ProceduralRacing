@@ -1,7 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
-using System;
+
+// The Grid is used to manage occupied cells in the track generation process.
+// It provides methods to occupy/unoccupy cells, check occupancy, and convert grid positions to world positions.
 
 public class Grid
 {
@@ -69,42 +71,11 @@ public class Grid
                IsInBounds(new Point(topLeft.X + size.X - 1, topLeft.Y + size.Y - 1));
     }
 
-
-    public bool RectangleContains(Point rectPosition, Point rectSize, Point point)
+    public bool DoesRectangleContain(Point rectPosition, Point rectSize, Point point)
     {
         return point.X >= rectPosition.X &&
                point.Y >= rectPosition.Y &&
                point.X < rectPosition.X + rectSize.X &&
                point.Y < rectPosition.Y + rectSize.Y;
-    }
-
-
-    public void Draw(SpriteBatch spriteBatch, Texture2D pixel)
-    {
-        for (int x = MinX; x <= MaxX; x++)
-        {
-            for (int y = MinY; y <= MaxY; y++)
-            {
-                Point cell = new(x, y);
-                bool occupiedCell = IsOccupied(cell);
-                Color fillColor = occupiedCell ? Color.DarkRed * 0.5f : Color.Green * 0.1f;
-
-                spriteBatch.Draw(pixel, ToWorldPosition(cell), null, fillColor, 0f,
-                    Vector2.Zero, new Vector2(TileSize, TileSize), SpriteEffects.None, 0f);
-            }
-        }
-
-        Color lineColor = Color.White * 0.25f;
-        for (int x = MinX; x <= MaxX + 1; x++)
-        {
-            Vector2 pos = ToWorldPosition(new Point(x, MinY));
-            spriteBatch.Draw(pixel, pos, null, lineColor, 0f, Vector2.Zero, new Vector2(1, (MaxY - MinY + 1) * TileSize), SpriteEffects.None, 0f);
-        }
-
-        for (int y = MinY; y <= MaxY + 1; y++)
-        {
-            Vector2 pos = ToWorldPosition(new Point(MinX, y));
-            spriteBatch.Draw(pixel, pos, null, lineColor, 0f, Vector2.Zero, new Vector2((MaxX - MinX + 1) * TileSize, 1), SpriteEffects.None, 0f);
-        }
     }
 }

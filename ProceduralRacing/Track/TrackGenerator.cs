@@ -4,19 +4,20 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
+
+
 public class TrackGenerator
 {
-    // --------------------------------------------------------
-    // -------------- PROPERTIES AND CONSTRUCTOR --------------
-    // --------------------------------------------------------
+    // --- Properties ---
 
     public List<PlacedPiece> Track;
-    private TrackConfig config;
-    private Grid Grid;
     public WorldConnection currentConnection;
     public WorldConnection startConnection;
     public Random random;
+
     private List<(TrackPiece piece, int rotation, bool flipped, List<Connection> connections)> uniquePieces;
+    private TrackConfig config;
+    private Grid Grid;
 
     private int totalAttempts = 0;
     private int seed;
@@ -26,6 +27,7 @@ public class TrackGenerator
                                  IsClosingExit(Track[^1].UsedExitConnection, Track[^1]) &&
                                  Track.Count >= config.MinLength;
 
+    // --- Constructor ---
     public TrackGenerator(Grid grid, int startingSeed, TrackDifficulty difficulty)
     { // Initializes the generator with available pieces, grid, and random seed
         Track = new List<PlacedPiece>();
@@ -36,9 +38,7 @@ public class TrackGenerator
         uniquePieces = PieceLibrary.PrecomputeUniqueTransforms(config.GetAllowedPieces());
     }
 
-    // --------------------------------------------------------
-    // ---------------- TRACK GENERATION LOGIC ----------------
-    // --------------------------------------------------------
+    // --- Track Generation Logic ---
 
     // How do we generate a track?
     // 1. Start with a starting piece at a fixed location and orientation
@@ -50,16 +50,13 @@ public class TrackGenerator
     // 7. Continue until the track is closed or reaches max length
 
     public void Update(GameTime gameTime)
-    {
+    { // Main update loop for track generation
+
+        // If the track is already closed, do nothing
         if (TrackIsClosed) return;
 
-        if (Track.Count >= config.MaxLength)
-        {
-            RestartTrack();
-            return;
-        }
-
-        if (totalAttempts >= config.MaxAttempts)
+        // If we've gone too long or exceeded attempts, restart
+        if (Track.Count >= config.MaxLength || totalAttempts >= config.MaxAttempts)
         {
             RestartTrack();
             return;
@@ -67,21 +64,24 @@ public class TrackGenerator
 
         if (TryNextPieceFromCurrentEnd()) return;
 
+        // Otherwise, backtrack
         Backtrack();
     }
 
-
-
-
     private void Backtrack()
     { // Removes the last piece and tries to find new options from the new tip
+
         if (Track.Count <= 1) return;
+
         RemovePiece();
-        if (!TryNextPieceFromCurrentEnd()) Backtrack();
+
+        if (!TryNextPieceFromCurrentEnd()) 
+            Backtrack();
     }
 
     private bool TryNextPieceFromCurrentEnd()
     { // Attempts to add the next piece from the last piece's remaining options
+
         var lastPiece = Track[^1];
 
         if (lastPiece.RemainingOptions.Count == 0) return false;
@@ -128,7 +128,10 @@ public class TrackGenerator
         // 8. Reward/penalize based on direction alignment towards the start
         score += GetAlignmentBonus(exit, placed, manhattan, progress, config.AlignmentBonus);
 
-        // 9. Small random factor to add variability
+        // 9. Reward based on piece difficulty
+        score += config.GetRatingBonus(piece.Difficulty);
+
+        // 10. Add some randomness to the score
         score += (float)random.NextDouble() * config.Randomness;
 
         return Math.Max(1f, score);
@@ -140,7 +143,7 @@ public class TrackGenerator
         placed = null;
         exit = null;
 
-        var connections = piece.GetTransformedConnections(rotation, flipped);
+        var connections = PieceLibrary.GetTransformedConnections(piece, rotation, flipped);
 
         // 1. Does it have a valid entry point?
         if (!HasValidEntry(connections, out var entry)) return false;
@@ -169,15 +172,11 @@ public class TrackGenerator
     }
 
 
-    // --------------------------------------------------------
-    // ------------------------ HELPERS -----------------------
-    // --------------------------------------------------------
-
-
     // --- State Management Helpers ---
-    // 
+ 
     private void RestartTrack()
     { // Resets the track generation with a +1 seed tweak
+
         seed++;
         random = new Random(seed);
         BeginTrack();
@@ -191,14 +190,6 @@ public class TrackGenerator
         currentConnection = default;
         totalAttempts = 0;
     }
-
-    private void OnTrackClosed(PlacedPiece closingPiece)
-    { // Clears remaining options and logs closure
-
-        closingPiece.RemainingOptions = new List<Candidate>();
-        Debug.WriteLine($"Track closed with {Track.Count} pieces placed");
-    }
-
 
     // --- Candidate Management Helpers ---
 
@@ -249,7 +240,7 @@ public class TrackGenerator
     }
 
     private bool HasValidExit(PlacedPiece candidate, Connection entry, out Connection exit)
-    { // Finds the exit connection (the one that isn't the entry) and checks if it's either closing or leads to empty space
+    {// Checks if the piece has a valid exit that either closes the track or leads to empty space
         exit = candidate.TransformedConnections.First(c => c != entry);
         if (IsClosingExit(exit, candidate)) return true;
         return exit.LeadsToEmptySpace(candidate.GridPosition, Grid);
@@ -257,7 +248,7 @@ public class TrackGenerator
 
     private bool IsAbleToReachStart(Point startPos)
     { // Checks if the current exit still has a valid path to end via floodfill
-        Point critical = startConnection.GridPosition + startConnection.Direction;
+        Point start = startConnection.GridPosition + startConnection.Direction;
 
         var visited = new HashSet<Point>();
         var queue = new Queue<Point>();
@@ -270,7 +261,7 @@ public class TrackGenerator
             var current = queue.Dequeue();
             steps++;
 
-            if (current == critical) return true;
+            if (current == start) return true;
 
             foreach (var dir in new[] { new Point(0, 1), new Point(0, -1), new Point(1, 0), new Point(-1, 0) })
             {
@@ -288,20 +279,20 @@ public class TrackGenerator
     }
 
     private bool OccupiesStartWithoutClosing(PlacedPiece candidate, Connection exit)
-    { // Checks if the current piece (when placed) will occupy the grid space adjacent to the start without closing the track
-        Point criticalCell = startConnection.GridPosition + startConnection.Direction;
+    { // Checks if the candidate piece occupies the critical return cell without closing the track
+        Point start = startConnection.GridPosition + startConnection.Direction;
+        bool occupiesAdjacent = Grid.DoesRectangleContain(candidate.GridPosition,
+                                                        candidate.TransformedSize, start);
 
-        bool occupiesAdjacent = Grid.RectangleContains(candidate.GridPosition, candidate.TransformedSize, criticalCell);
         if (!occupiesAdjacent) return false;
-
         return !IsClosingExit(exit, candidate);
     }
 
     private float GetManhattanToStart(PlacedPiece placed, Connection exit)
-    {
+    { // Calculates the Manhattan distance from the exit to the start connection
         Point nextCell = placed.GridPosition + exit.Position + exit.Direction;
-        Point criticalCell = startConnection.GridPosition + startConnection.Direction;
-        return Math.Abs(criticalCell.X - nextCell.X) + Math.Abs(criticalCell.Y - nextCell.Y);
+        Point start = startConnection.GridPosition + startConnection.Direction;
+        return Math.Abs(start.X - nextCell.X) + Math.Abs(start.Y - nextCell.Y);
     }
 
 
@@ -327,8 +318,7 @@ public class TrackGenerator
         Point nextCell = placed.GridPosition + exit.Position + exit.Direction;
         Point criticalCell = startConnection.GridPosition + startConnection.Direction;
 
-        Vector2 toHome = Vector2.Normalize(new Vector2(criticalCell.X - nextCell.X,
-                                                       criticalCell.Y - nextCell.Y));
+        Vector2 toHome = Vector2.Normalize(new Vector2(criticalCell.X - nextCell.X, criticalCell.Y - nextCell.Y));
 
         float alignment = Vector2.Dot(currentDir, toHome);
 
@@ -337,7 +327,6 @@ public class TrackGenerator
 
 
     // --- Track Management Helpers --- 
-
 
     public void BeginTrack()
     { // Initializes the track with the starting piece
@@ -358,15 +347,14 @@ public class TrackGenerator
     public void AddPiece(PlacedPiece piece, Connection exit)
     { // Adds a piece to the track, occupies the grid and updates current connection
 
+        if (piece == null) return;
+
         totalAttempts++;
         Track.Add(piece);
         Grid.OccupyRectangle(piece.GridPosition, piece.TransformedSize);
         piece.UsedExitConnection = exit;
         currentConnection = new WorldConnection(piece.GridPosition + exit.Position,
                                                 exit.Direction);
-
-        // Check for closure
-        if (IsClosingExit(exit, piece)) OnTrackClosed(piece);
     }
 
     public void RemovePiece()

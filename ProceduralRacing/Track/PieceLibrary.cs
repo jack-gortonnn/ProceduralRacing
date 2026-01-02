@@ -1,14 +1,26 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+
+// --- Track Type ---
+public enum TrackType { Grid, Straight, Turn, Hairpin, Chicane, Complex }
+
+
+
+// The Piece Library contains all predefined track pieces used in procedural generation.
+// It provides access to the starting piece and a list of all available pieces,
+// along with utility methods for transforming piece connections based on rotation and flipping.
+
 public class PieceLibrary
 {
+    // --- Starting Piece ---
     public static TrackPiece StartingPiece = 
         new TrackPiece("5x1_grid", new Point(5, 1), TrackType.Grid, 0, new List<Connection>{
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(4,0), new Point(1,0))
     });
+
+    // --- All Pieces ---
     public static List<TrackPiece> All = new List<TrackPiece>()
     {
         new TrackPiece("1x1_straight", new Point(1,1), TrackType.Straight, 1, new List<Connection>{
@@ -172,9 +184,11 @@ public class PieceLibrary
             new Connection(new Point(4,1), new Point(1,0))
         }),
     };
-    public static List<(TrackPiece, int, bool, List<Connection>)> PrecomputeUniqueTransforms(List<TrackPiece> pieces)
-    {
-        var precomputedUniqueTransforms = new List<(TrackPiece, int, bool, List<Connection>)>();
+
+    // --- Utility Helpers ---
+    public static List<(TrackPiece piece, int rotation, bool flipped, List<Connection> connections)> PrecomputeUniqueTransforms(List<TrackPiece> pieces)
+    { // Returns a list of tuples containing the piece, rotation, flip status, and transformed connections for each unique configuration
+        var precomputed = new List<(TrackPiece, int, bool, List<Connection>)>();
         var seenSignatures = new HashSet<string>();
 
         foreach (var piece in pieces)
@@ -184,9 +198,9 @@ public class PieceLibrary
                 for (int flip = 0; flip < 2; flip++)
                 {
                     bool flipped = flip == 1;
-                    var connections = piece.GetTransformedConnections(rotation, flipped);
 
-                    // Create a unique signature for this layout of connections
+                    var connections = GetTransformedConnections(piece, rotation, flipped);
+
                     string signature = string.Join("|",
                         connections
                             .OrderBy(c => c.Position.X)
@@ -196,15 +210,53 @@ public class PieceLibrary
                             .Select(c => $"{c.Position.X},{c.Position.Y}:{c.Direction.X},{c.Direction.Y}")
                     );
 
-                    // Only add if we haven't seen this exact connection layout before for this piece
                     if (seenSignatures.Add(piece.Name + "_" + signature))
                     {
-                        precomputedUniqueTransforms.Add((piece, rotation, flipped, connections));
+                        precomputed.Add((piece, rotation, flipped, connections));
                     }
                 }
             }
         }
 
-        return precomputedUniqueTransforms;
+        return precomputed;
     }
+
+    public static List<Connection> GetTransformedConnections(TrackPiece piece, int rotation = 0, bool flipped = false)
+    { // Transforms the connections of a piece based on rotation and flip status
+        List<Connection> transformedConnections = new List<Connection>();
+        int w = piece.Size.X;
+        int h = piece.Size.Y;
+
+        foreach (var con in piece.Connections)
+        {
+            Point pos = con.Position;
+            Point dir = con.Direction;
+
+            if (flipped)
+            {
+                pos = new Point(w - 1 - pos.X, pos.Y);
+                dir = new Point(-dir.X, dir.Y);
+            }
+
+            Point finalPos = rotation switch
+            {
+                1 => new Point(h - 1 - pos.Y, pos.X),
+                2 => new Point(w - 1 - pos.X, h - 1 - pos.Y),
+                3 => new Point(pos.Y, w - 1 - pos.X),
+                _ => pos
+            };
+            Point finalDir = rotation switch
+            {
+                1 => new Point(-dir.Y, dir.X),
+                2 => new Point(-dir.X, -dir.Y),
+                3 => new Point(dir.Y, -dir.X),
+                _ => dir
+            };
+
+            transformedConnections.Add(new Connection(finalPos, finalDir));
+        }
+
+        return transformedConnections;
+    }
+
 }
