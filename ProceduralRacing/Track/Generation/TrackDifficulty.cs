@@ -54,7 +54,7 @@ public class TrackConfig
                     MaxEarlyBonus = 10f,
                     MaxLateBonus = 700f,
                     AlignmentBonus = 150f,
-                    Randomness = 13f,
+                    Randomness = 100f,
                     MaxPieceDifficulty = 1
                 };
 
@@ -73,7 +73,7 @@ public class TrackConfig
                     MaxEarlyBonus = 20f,
                     MaxLateBonus = 600f,
                     AlignmentBonus = 100f,
-                    Randomness = 25f,
+                    Randomness = 125f,
                     MaxPieceDifficulty = 2
                 };
 
@@ -92,7 +92,7 @@ public class TrackConfig
                     MaxEarlyBonus = 30f,
                     MaxLateBonus = 500f,
                     AlignmentBonus = 60f,
-                    Randomness = 50f,
+                    Randomness = 150f,
                     MaxPieceDifficulty = 3
                 };
 
@@ -111,7 +111,7 @@ public class TrackConfig
                     MaxEarlyBonus = 40f,
                     MaxLateBonus = 400f,
                     AlignmentBonus = 50f,
-                    Randomness = 100f,
+                    Randomness = 200f,
                     MaxPieceDifficulty = 4
                 };
 

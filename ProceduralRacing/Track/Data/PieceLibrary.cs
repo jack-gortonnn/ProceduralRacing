@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework.Graphics;
 
 // --- Track Type ---
 public enum TrackType { Grid, Straight, Turn, Hairpin, Chicane, Complex }
@@ -184,6 +186,24 @@ public class PieceLibrary
             new Connection(new Point(4,1), new Point(1,0))
         }),
     };
+
+    // --- Content Loading ---
+    public static void LoadContent(ContentManager Content)
+    { // Loads textures for all pieces in the library
+        foreach (var piece in All)
+        {
+            piece.Texture = Content.Load<Texture2D>(
+                $"textures/pieces/{piece.Name}"
+            );
+        }
+
+        if (StartingPiece != null)
+        {
+            StartingPiece.Texture = Content.Load<Texture2D>(
+                $"textures/pieces/{StartingPiece.Name}"
+            );
+        }
+    }
 
     // --- Utility Helpers ---
     public static List<(TrackPiece piece, int rotation, bool flipped, List<Connection> connections)> PrecomputeUniqueTransforms(List<TrackPiece> pieces)

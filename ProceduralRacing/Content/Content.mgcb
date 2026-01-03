@@ -13,14 +13,14 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin fonts/Arial.spritefont
+#begin fonts/Formula1.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:fonts/Arial.spritefont
+/build:fonts/Formula1.spritefont
 
-#begin textures/1x1_straight.png
+#begin textures/backgrounds/americas.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -30,9 +30,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/1x1_straight.png
+/build:textures/backgrounds/americas.png
 
-#begin textures/1x1_turn.png
+#begin textures/backgrounds/asia.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -42,9 +42,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/1x1_turn.png
+/build:textures/backgrounds/asia.png
 
-#begin textures/2x1_chicane.png
+#begin textures/backgrounds/europe.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -54,9 +54,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x1_chicane.png
+/build:textures/backgrounds/europe.png
 
-#begin textures/2x1_hairpin.png
+#begin textures/backgrounds/middleeast.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -66,9 +66,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x1_hairpin.png
+/build:textures/backgrounds/middleeast.png
 
-#begin textures/2x1_straight.png
+#begin textures/backgrounds/oceania.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -78,9 +78,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x1_straight.png
+/build:textures/backgrounds/oceania.png
 
-#begin textures/2x1_turn.png
+#begin textures/pieces/1x1_straight.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -90,9 +90,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x1_turn.png
+/build:textures/pieces/1x1_straight.png
 
-#begin textures/2x2_bendturn.png
+#begin textures/pieces/1x1_turn.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -102,9 +102,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x2_bendturn.png
+/build:textures/pieces/1x1_turn.png
 
-#begin textures/2x2_boxturn.png
+#begin textures/pieces/2x1_chicane.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -114,9 +114,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x2_boxturn.png
+/build:textures/pieces/2x1_chicane.png
 
-#begin textures/2x2_monacohairpin.png
+#begin textures/pieces/2x1_hairpin.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -126,9 +126,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x2_monacohairpin.png
+/build:textures/pieces/2x1_hairpin.png
 
-#begin textures/2x2_singaporesling.png
+#begin textures/pieces/2x1_straight.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -138,9 +138,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x2_singaporesling.png
+/build:textures/pieces/2x1_straight.png
 
-#begin textures/2x2_smoothchicane.png
+#begin textures/pieces/2x1_turn.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -150,9 +150,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x2_smoothchicane.png
+/build:textures/pieces/2x1_turn.png
 
-#begin textures/2x2_tightchicane.png
+#begin textures/pieces/2x2_bendturn.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -162,9 +162,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x2_tightchicane.png
+/build:textures/pieces/2x2_bendturn.png
 
-#begin textures/2x2_tightturn.png
+#begin textures/pieces/2x2_boxturn.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -174,9 +174,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x2_tightturn.png
+/build:textures/pieces/2x2_boxturn.png
 
-#begin textures/2x2_turn.png
+#begin textures/pieces/2x2_monacohairpin.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -186,9 +186,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x2_turn.png
+/build:textures/pieces/2x2_monacohairpin.png
 
-#begin textures/2x2_zturn.png
+#begin textures/pieces/2x2_singaporesling.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -198,9 +198,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/2x2_zturn.png
+/build:textures/pieces/2x2_singaporesling.png
 
-#begin textures/3x1_straight.png
+#begin textures/pieces/2x2_smoothchicane.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -210,9 +210,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x1_straight.png
+/build:textures/pieces/2x2_smoothchicane.png
 
-#begin textures/3x2_aintree.png
+#begin textures/pieces/2x2_tightchicane.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -222,9 +222,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_aintree.png
+/build:textures/pieces/2x2_tightchicane.png
 
-#begin textures/3x2_ascari.png
+#begin textures/pieces/2x2_tightturn.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -234,9 +234,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_ascari.png
+/build:textures/pieces/2x2_tightturn.png
 
-#begin textures/3x2_barcelonalast.png
+#begin textures/pieces/2x2_turn.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -246,9 +246,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_barcelonalast.png
+/build:textures/pieces/2x2_turn.png
 
-#begin textures/3x2_copse.png
+#begin textures/pieces/2x2_zturn.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -258,9 +258,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_copse.png
+/build:textures/pieces/2x2_zturn.png
 
-#begin textures/3x2_doubleapex.png
+#begin textures/pieces/3x1_straight.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -270,9 +270,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_doubleapex.png
+/build:textures/pieces/3x1_straight.png
 
-#begin textures/3x2_hairpin.png
+#begin textures/pieces/3x2_aintree.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -282,9 +282,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_hairpin.png
+/build:textures/pieces/3x2_aintree.png
 
-#begin textures/3x2_hungaryhairpin.png
+#begin textures/pieces/3x2_ascari.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -294,9 +294,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_hungaryhairpin.png
+/build:textures/pieces/3x2_ascari.png
 
-#begin textures/3x2_monzachicane.png
+#begin textures/pieces/3x2_barcelonalast.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -306,9 +306,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_monzachicane.png
+/build:textures/pieces/3x2_barcelonalast.png
 
-#begin textures/3x2_nouveauchicane.png
+#begin textures/pieces/3x2_copse.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -318,9 +318,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_nouveauchicane.png
+/build:textures/pieces/3x2_copse.png
 
-#begin textures/3x2_openaintree.png
+#begin textures/pieces/3x2_doubleapex.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -330,9 +330,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_openaintree.png
+/build:textures/pieces/3x2_doubleapex.png
 
-#begin textures/3x2_openclub.png
+#begin textures/pieces/3x2_hairpin.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -342,9 +342,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_openclub.png
+/build:textures/pieces/3x2_hairpin.png
 
-#begin textures/3x2_smoothchicane.png
+#begin textures/pieces/3x2_hungaryhairpin.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -354,9 +354,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_smoothchicane.png
+/build:textures/pieces/3x2_hungaryhairpin.png
 
-#begin textures/3x2_tightchicane.png
+#begin textures/pieces/3x2_monzachicane.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -366,9 +366,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_tightchicane.png
+/build:textures/pieces/3x2_monzachicane.png
 
-#begin textures/3x2_wideturn.png
+#begin textures/pieces/3x2_nouveauchicane.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -378,9 +378,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x2_wideturn.png
+/build:textures/pieces/3x2_nouveauchicane.png
 
-#begin textures/3x3_parabolica.png
+#begin textures/pieces/3x2_openaintree.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -390,9 +390,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x3_parabolica.png
+/build:textures/pieces/3x2_openaintree.png
 
-#begin textures/3x3_saopaulo.png
+#begin textures/pieces/3x2_openclub.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -402,9 +402,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x3_saopaulo.png
+/build:textures/pieces/3x2_openclub.png
 
-#begin textures/3x3_turn.png
+#begin textures/pieces/3x2_smoothchicane.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -414,9 +414,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/3x3_turn.png
+/build:textures/pieces/3x2_smoothchicane.png
 
-#begin textures/4x1_straight.png
+#begin textures/pieces/3x2_tightchicane.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -426,9 +426,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/4x1_straight.png
+/build:textures/pieces/3x2_tightchicane.png
 
-#begin textures/4x2_smoothchicane.png
+#begin textures/pieces/3x2_wideturn.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -438,9 +438,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/4x2_smoothchicane.png
+/build:textures/pieces/3x2_wideturn.png
 
-#begin textures/4x2_tightchicane.png
+#begin textures/pieces/3x3_parabolica.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -450,9 +450,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/4x2_tightchicane.png
+/build:textures/pieces/3x3_parabolica.png
 
-#begin textures/4x3_copse.png
+#begin textures/pieces/3x3_saopaulo.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -462,9 +462,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/4x3_copse.png
+/build:textures/pieces/3x3_saopaulo.png
 
-#begin textures/4x3_copsestraight.png
+#begin textures/pieces/3x3_turn.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -474,9 +474,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/4x3_copsestraight.png
+/build:textures/pieces/3x3_turn.png
 
-#begin textures/5x1_grid.png
+#begin textures/pieces/4x1_straight.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -486,9 +486,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/5x1_grid.png
+/build:textures/pieces/4x1_straight.png
 
-#begin textures/5x1_straight.png
+#begin textures/pieces/4x2_smoothchicane.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -498,9 +498,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/5x1_straight.png
+/build:textures/pieces/4x2_smoothchicane.png
 
-#begin textures/5x2_maggotsbecketts.png
+#begin textures/pieces/4x2_tightchicane.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -510,5 +510,65 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:textures/5x2_maggotsbecketts.png
+/build:textures/pieces/4x2_tightchicane.png
+
+#begin textures/pieces/4x3_copse.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:textures/pieces/4x3_copse.png
+
+#begin textures/pieces/4x3_copsestraight.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:textures/pieces/4x3_copsestraight.png
+
+#begin textures/pieces/5x1_grid.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:textures/pieces/5x1_grid.png
+
+#begin textures/pieces/5x1_straight.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:textures/pieces/5x1_straight.png
+
+#begin textures/pieces/5x2_maggotsbecketts.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:textures/pieces/5x2_maggotsbecketts.png
 
