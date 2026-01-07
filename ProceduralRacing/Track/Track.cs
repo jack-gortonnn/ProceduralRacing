@@ -55,20 +55,16 @@ public class Track
             int texWidth = backgroundTexture.Width;
             int texHeight = backgroundTexture.Height;
 
-            Vector2 cameraPos = camera.Position;
+            // Calculate grid bounds in world space
+            int gridStartX = Grid.MinX * Constants.TileSize;
+            int gridStartY = Grid.MinY * Constants.TileSize;
+            int gridEndX = Grid.MaxX * Constants.TileSize;
+            int gridEndY = Grid.MaxY * Constants.TileSize;
 
-            float left = cameraPos.X - (viewport.Width / 2f) / camera.Zoom;
-            float top = cameraPos.Y - (viewport.Height / 2f) / camera.Zoom;
-
-            int startX = (int)Math.Floor(left / texWidth) * texWidth;
-            int startY = (int)Math.Floor(top / texHeight) * texHeight;
-
-            int endX = (int)Math.Ceiling((left + viewport.Width / camera.Zoom) / texWidth) * texWidth + texWidth + texWidth + texWidth + texWidth + texWidth + texWidth;
-            int endY = (int)Math.Ceiling((top + viewport.Height / camera.Zoom) / texHeight) * texHeight + texHeight + texWidth + texWidth + texWidth + texWidth + texWidth;
-
-            for (int x = startX; x < endX; x += texWidth)
+            // Tile the background across the entire grid
+            for (int x = gridStartX; x < gridEndX; x += texWidth)
             {
-                for (int y = startY; y < endY; y += texHeight)
+                for (int y = gridStartY; y < gridEndY; y += texHeight)
                 {
                     spriteBatch.Draw(
                         backgroundTexture,
@@ -79,7 +75,7 @@ public class Track
                         Vector2.Zero,
                         1f,
                         SpriteEffects.None,
-                        1f
+                        0f  // Changed from 1f to 0f
                     );
                 }
             }
