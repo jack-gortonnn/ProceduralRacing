@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 
 public class Camera
@@ -7,9 +8,8 @@ public class Camera
     public Vector2 Position;
     public float Zoom;
 
-    public Camera(Vector2 position, float zoom)
+    public Camera(float zoom)
     {
-        Position = position;
         Zoom = zoom;
     }
 
@@ -28,32 +28,22 @@ public class Camera
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        Vector2 move = Vector2.Zero;
-
-        if (kb.IsKeyDown(Keys.W)) move.Y -= 1f;
-        if (kb.IsKeyDown(Keys.S)) move.Y += 1f;
-        if (kb.IsKeyDown(Keys.A)) move.X -= 1f;
-        if (kb.IsKeyDown(Keys.D)) move.X += 1f;
-
-        Move(move * 600f * dt);
-
         // Zoom
         if (kb.IsKeyDown(Keys.Q)) AddZoom(-0.8f * dt);
         if (kb.IsKeyDown(Keys.E)) AddZoom(0.8f * dt);
     }
 
     // --- Utility Helpers ---
-    public void Move(Vector2 delta) => Position += delta;
 
     public void AddZoom(float delta)
     {
-        // Clamp zoom to avoid negative or zero
         Zoom = MathHelper.Clamp(Zoom + delta, 0.1f, 10f);
     }
 
-    // later for car
-    public void CenterOn(Vector2 target)
+    public void CenterOn(Vector2 target, Viewport viewport)
     {
-        Position = target;
+        Vector2 halfScreen = new Vector2(viewport.Width, viewport.Height) / 2f / Zoom;
+        Position = target - halfScreen;
     }
 }
+

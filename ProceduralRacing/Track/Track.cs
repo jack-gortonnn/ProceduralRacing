@@ -63,6 +63,7 @@ public class Track
             int startX = (int)Math.Floor(left / texWidth) * texWidth;
             int startY = (int)Math.Floor(top / texHeight) * texHeight;
 
+            // hacky, fix later
             int endX = (int)Math.Ceiling((left + viewport.Width / camera.Zoom) / texWidth) * texWidth + texWidth + texWidth + texWidth + texWidth + texWidth + texWidth;
             int endY = (int)Math.Ceiling((top + viewport.Height / camera.Zoom) / texHeight) * texHeight + texHeight + texWidth + texWidth + texWidth + texWidth + texWidth;
 

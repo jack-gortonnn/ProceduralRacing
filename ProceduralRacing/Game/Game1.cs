@@ -13,6 +13,7 @@ namespace ProceduralRacing
         private Camera camera;
         private Grid grid;
         private Track track;
+        private Car car;
 
         private Random random = new Random();
         private int seed;
@@ -36,7 +37,9 @@ namespace ProceduralRacing
             seed = random.Next(1, 9999999);
             grid = new Grid(0, 25, 0, 25, Constants.TileSize);
             track = new Track(grid, seed, TrackDifficulty.Easy);
-            camera = new Camera(new Vector2(Constants.TileSize * 10, Constants.TileSize * 14), 1f);
+            car = new Car(new Vector2(Constants.TileSize * 10, Constants.TileSize * 14));
+            camera = new Camera(1f);
+
             Interface.Initialize(Content, GraphicsDevice);
 
             base.Initialize();
@@ -45,7 +48,7 @@ namespace ProceduralRacing
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            car.LoadContent(Content);
             PieceLibrary.LoadContent(Content);
             track.LoadContent(Content);
         }
@@ -53,8 +56,6 @@ namespace ProceduralRacing
         protected override void Update(GameTime gameTime)
         {
             KeyboardState kb = Keyboard.GetState();
-
-            camera.Update(gameTime, kb);
 
             // --- Difficulty selection ---
             if (kb.IsKeyDown(Keys.D1)) track.SetDifficulty(Content, TrackDifficulty.Easy);
@@ -77,6 +78,12 @@ namespace ProceduralRacing
                 timer = 0f;
             }
 
+            // --- Update car ---
+            car.Update(gameTime);
+
+            camera.Update(gameTime, kb);
+            camera.CenterOn(car.Position, GraphicsDevice.Viewport);
+
             base.Update(gameTime);
         }
 
@@ -91,6 +98,9 @@ namespace ProceduralRacing
             );
 
             track.Draw(spriteBatch, GraphicsDevice.Viewport, camera);
+
+
+            car.Draw(spriteBatch);
 
             spriteBatch.End();
 
