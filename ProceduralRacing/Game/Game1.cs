@@ -38,7 +38,7 @@ namespace ProceduralRacing
             grid = new Grid(0, 25, 0, 25, Constants.TileSize);
             track = new Track(grid, seed, TrackDifficulty.Easy);
             car = new Car(new Vector2(Constants.TileSize * 10, Constants.TileSize * 14));
-            camera = new Camera(1f);
+            camera = new Camera(Vector2.Zero,1f);
 
             Interface.Initialize(Content, GraphicsDevice);
 
@@ -56,6 +56,7 @@ namespace ProceduralRacing
         protected override void Update(GameTime gameTime)
         {
             KeyboardState kb = Keyboard.GetState();
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // --- Difficulty selection ---
             if (kb.IsKeyDown(Keys.D1)) track.SetDifficulty(Content, TrackDifficulty.Easy);
@@ -81,8 +82,10 @@ namespace ProceduralRacing
             // --- Update car ---
             car.Update(gameTime);
 
-            camera.Update(gameTime, kb);
-            camera.CenterOn(car.Position, GraphicsDevice.Viewport);
+            // --- Update camera ---
+            camera.FollowCar(car, GraphicsDevice.Viewport, dt, 6f);
+            camera.FollowRotation(car.Rotation, dt, 6f);
+            camera.UpdateZoom(gameTime, kb);
 
             base.Update(gameTime);
         }
@@ -93,12 +96,11 @@ namespace ProceduralRacing
 
             // --- World ---
             spriteBatch.Begin(
-                transformMatrix: camera.GetViewMatrix(),
+                transformMatrix: camera.GetViewMatrix(GraphicsDevice.Viewport),
                 samplerState: SamplerState.PointClamp
             );
 
-            track.Draw(spriteBatch, GraphicsDevice.Viewport, camera);
-
+            track.Draw(spriteBatch, grid);
 
             car.Draw(spriteBatch);
 

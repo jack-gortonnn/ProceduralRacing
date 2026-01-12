@@ -78,4 +78,21 @@ public class Grid
                point.X < rectPosition.X + rectSize.X &&
                point.Y < rectPosition.Y + rectSize.Y;
     }
+
+    public void DrawGridBackground(SpriteBatch spriteBatch, Texture2D texture)
+    {
+        int texWidth = texture.Width;
+        int texHeight = texture.Height;
+
+        float worldWidth = (MaxX - MinX + 1) * TileSize;
+        float worldHeight = (MaxY - MinY + 1) * TileSize;
+
+        for (float x = MinX * TileSize; x < MinX * TileSize + worldWidth; x += texWidth)
+        {
+            for (float y = MinY * TileSize; y < MinY * TileSize + worldHeight; y += texHeight)
+            {
+                spriteBatch.Draw(texture, new Vector2(x, y), Color.White);
+            }
+        }
+    }
 }

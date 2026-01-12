@@ -48,49 +48,16 @@ public class Track
         Generator.Update(gameTime);
     }
 
-    public void Draw(SpriteBatch spriteBatch, Viewport viewport, Camera camera)
+    public void Draw(SpriteBatch spriteBatch, Grid grid)
     {
-        if (backgroundTexture != null)
-        {
-            int texWidth = backgroundTexture.Width;
-            int texHeight = backgroundTexture.Height;
-
-            Vector2 cameraPos = camera.Position;
-
-            float left = cameraPos.X - (viewport.Width / 2f) / camera.Zoom;
-            float top = cameraPos.Y - (viewport.Height / 2f) / camera.Zoom;
-
-            int startX = (int)Math.Floor(left / texWidth) * texWidth;
-            int startY = (int)Math.Floor(top / texHeight) * texHeight;
-
-            // hacky, fix later
-            int endX = (int)Math.Ceiling((left + viewport.Width / camera.Zoom) / texWidth) * texWidth + texWidth + texWidth + texWidth + texWidth + texWidth + texWidth;
-            int endY = (int)Math.Ceiling((top + viewport.Height / camera.Zoom) / texHeight) * texHeight + texHeight + texWidth + texWidth + texWidth + texWidth + texWidth;
-
-            for (int x = startX; x < endX; x += texWidth)
-            {
-                for (int y = startY; y < endY; y += texHeight)
-                {
-                    spriteBatch.Draw(
-                        backgroundTexture,
-                        new Vector2(x, y),
-                        null,
-                        Color.White,
-                        0f,
-                        Vector2.Zero,
-                        1f,
-                        SpriteEffects.None,
-                        1f
-                    );
-                }
-            }
-        }
+        grid.DrawGridBackground(spriteBatch, backgroundTexture);
 
         foreach (var piece in Pieces)
         {
             piece.Draw(spriteBatch);
         }
     }
+
 
     public void Reset(ContentManager content, int? newSeed = null, TrackDifficulty? newDifficulty = null)
     {
