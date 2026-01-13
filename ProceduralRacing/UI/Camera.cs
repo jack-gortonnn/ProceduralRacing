@@ -43,7 +43,8 @@ public class Camera
 
     public Matrix GetViewMatrix(Viewport viewport)
     {
-        Vector2 screenCenter = new Vector2(viewport.Width / 2f, viewport.Height / 2f);
+        // 3/4ths down the screen
+        Vector2 screenCenter = new Vector2(viewport.Width / 2f, (viewport.Height / 6f)*5f);
 
         // Apply -90° offset so car's forward is "up" on screen
         float rotationWithOffset = -Rotation - MathHelper.PiOver2;

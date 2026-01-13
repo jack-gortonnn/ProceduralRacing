@@ -37,7 +37,7 @@ namespace ProceduralRacing
             seed = random.Next(1, 9999999);
             grid = new Grid(0, 25, 0, 25, Constants.TileSize);
             track = new Track(grid, seed, TrackDifficulty.Easy);
-            car = new Car(new Vector2(Constants.TileSize * 10, Constants.TileSize * 14));
+            car = new Car(new Vector2((Constants.TileSize * 14) + 8, (Constants.TileSize * 14) + 44));
             camera = new Camera(Vector2.Zero,1f);
 
             Interface.Initialize(Content, GraphicsDevice);
@@ -69,6 +69,7 @@ namespace ProceduralRacing
             {
                 int newSeed = random.Next(10000, 99999);
                 track.Reset(Content, newSeed);
+                car.ResetCar();
             }
 
             // --- Track generation tick ---
@@ -83,8 +84,8 @@ namespace ProceduralRacing
             car.Update(gameTime);
 
             // --- Update camera ---
-            camera.FollowCar(car, GraphicsDevice.Viewport, dt, 6f);
-            camera.FollowRotation(car.Rotation, dt, 6f);
+            camera.FollowCar(car, GraphicsDevice.Viewport, dt, 15f);
+            camera.FollowRotation(car.Rotation, dt, 15f);
             camera.UpdateZoom(gameTime, kb);
 
             base.Update(gameTime);
