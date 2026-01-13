@@ -34,10 +34,11 @@ namespace ProceduralRacing
 
         protected override void Initialize()
         {
+            Vector2 startPos = new Vector2((Constants.TileSize * 14) + 8, (Constants.TileSize * 14) + 44);
             seed = random.Next(1, 9999999);
             grid = new Grid(0, 25, 0, 25, Constants.TileSize);
             track = new Track(grid, seed, TrackDifficulty.Easy);
-            car = new Car(new Vector2((Constants.TileSize * 14) + 8, (Constants.TileSize * 14) + 44));
+            car = new Car(startPos, CarPreset.Drifty);
             camera = new Camera(Vector2.Zero,1f);
 
             Interface.Initialize(Content, GraphicsDevice);

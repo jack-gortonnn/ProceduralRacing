@@ -17,7 +17,7 @@ public class Camera
 
     public void FollowCar(Car car, Viewport viewport, float dt, float smoothing)
     { // Smoothly follow position
-        float speedFactor = car.Velocity.Length() / car.maxSpeed; // 0..1
+        float speedFactor = car.Velocity.Length() / car.config.maxSpeed; // 0..1
         float smoothingFactor = MathHelper.Lerp(smoothing * 0.5f, smoothing, speedFactor);
 
         Vector2 screenCenter = new Vector2(viewport.Width / 2f, viewport.Height / 2f);

@@ -10,27 +10,22 @@ namespace ProceduralRacing
     {
         private Texture2D sprite;
         private Vector2 origin;
+        public CarConfig config;
 
         public Vector2 Position;
         public Vector2 Velocity;
+        private float angularVelocity = 0f;
         public float Rotation;
         public float Scale = 0.35f;
 
-        private float acceleration = 150f;       // units per second^2
-        public float maxSpeed = 200f;            // units per second
-        private float friction = 0.995f;         // multiply velocity when not accelerating
-        private float brakingPower = 0.98f;      // multiply velocity when braking
-        private float angularVelocity = 0f;      // current turning speed
-        private float turnAcceleration = 8f;     // how fast turning builds up (radians/sec²)
-        private float maxTurnSpeed = 3.5f;       // max turning speed (radians/sec)
-        public float gripFactor = 0.1f;          // 0 = very slidy, 1 = very grippy
 
 
-        public Car(Vector2 startPosition)
+        public Car(Vector2 startPosition, CarPreset preset)
         {
             Position = startPosition;
             Rotation = 0f;
             Velocity = Vector2.Zero;
+            config = CarConfig.FromPreset(preset);
         }
 
         public void LoadContent(ContentManager content)
@@ -56,34 +51,34 @@ namespace ProceduralRacing
 
 
             float input = (kb.IsKeyDown(Keys.D) ? 1f : 0f) - (kb.IsKeyDown(Keys.A) ? 1f : 0f);
-            float speedFactor = 1f / (1f + (Velocity.Length() / maxSpeed) * (Velocity.Length() / maxSpeed) * 2f);
+            float speedFactor = 1f / (1f + (Velocity.Length() / config.maxSpeed) * (Velocity.Length() / config.maxSpeed) * 2f);
             angularVelocity = MathHelper.Clamp(
-                angularVelocity + (input * maxTurnSpeed * speedFactor - angularVelocity)
-                * turnAcceleration * dt,
-                -maxTurnSpeed * speedFactor,
-                maxTurnSpeed * speedFactor
+                angularVelocity + (input * config.maxTurnSpeed * speedFactor - angularVelocity)
+                * config.turnAcceleration * dt,
+                -config.maxTurnSpeed * speedFactor,
+                config.maxTurnSpeed * speedFactor
             );
 
             Rotation += angularVelocity * dt;
 
             if (kb.IsKeyDown(Keys.W))
             {
-                Velocity += forward * acceleration * dt;
-                if (Velocity.Length() > maxSpeed)
-                    Velocity = Vector2.Normalize(Velocity) * maxSpeed;
+                Velocity += forward * config.acceleration * dt;
+                if (Velocity.Length() > config.maxSpeed)
+                    Velocity = Vector2.Normalize(Velocity) * config.maxSpeed;
             }
             if (kb.IsKeyDown(Keys.S))
             {
-                Velocity *= brakingPower;
+                Velocity *= config.brakingPower;
             }
 
             if (!kb.IsKeyDown(Keys.W) && !kb.IsKeyDown(Keys.S))
             {
-                Velocity *= (float)Math.Pow(friction, dt * 60f);
+                Velocity *= (float)Math.Pow(config.friction, dt * 60f);
             }
 
             float lateralVelocity = Vector2.Dot(Velocity, right);
-            float gripStrength = MathHelper.Lerp(0f, 1.1f, gripFactor);
+            float gripStrength = MathHelper.Lerp(0f, 1.1f, config.gripFactor);
             Velocity -= right * lateralVelocity * gripStrength;
 
             if (Velocity.Length() < 0.5f)
