@@ -49,10 +49,6 @@ public class PieceLibrary
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(0,0), new Point(0,1))
         }),
-        new TrackPiece("2x1_turn", new Point(2,1), TrackType.Turn, 2, new List<Connection>{
-            new Connection(new Point(0,0), new Point(-1,0)),
-            new Connection(new Point(1,0), new Point(0,1))
-        }),
         new TrackPiece("2x2_turn", new Point(2,2), TrackType.Turn, 1, new List<Connection>{
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(1,1), new Point(0,1))
