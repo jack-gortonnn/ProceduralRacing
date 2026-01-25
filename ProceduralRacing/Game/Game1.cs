@@ -82,7 +82,7 @@ namespace ProceduralRacing
             }
 
             // --- Update car ---
-            car.Update(gameTime);
+            car.Update(gameTime, track.Pieces);
 
             // --- Update camera ---
             camera.FollowCar(car, GraphicsDevice.Viewport, dt, 15f);
@@ -114,7 +114,8 @@ namespace ProceduralRacing
             Interface.DrawTextWithBorder(spriteBatch, $"Seed - {track.Seed}", new Vector2(10, 10), Color.White, Color.Black, 2);
             Interface.DrawTextWithBorder(spriteBatch, $"Name - {track.Info.Name}",new Vector2(10, 58), Color.White, Color.Black, 2);
             Interface.DrawTextWithBorder(spriteBatch, $"Region - {track.Info.RegionName}",new Vector2(10, 106), Color.White, Color.Black, 2);
-            Interface.DrawTextWithBorder(spriteBatch, $"Difficulty - {track.Difficulty}",new Vector2(10, 154), Color.White, Color.Black ,2);
+            Interface.DrawTextWithBorder(spriteBatch, $"Difficulty - {track.Difficulty}",new Vector2(10, 154), Color.White, Color.Black, 2);
+            Interface.DrawTextWithBorder(spriteBatch, $"On track - {car.isOnTrack}", new Vector2(10, 200), Color.White, Color.Black, 2);
 
             spriteBatch.End();
 

@@ -12,6 +12,7 @@ public class CarConfig
     public float maxSpeed;             // pixels per second
     public float friction;             // multiply velocity when not accelerating
     public float brakingPower;         // multiply velocity when braking
+    public float oobBrakingPower;      // multiply velocity when out of bounds
     public float turnAcceleration;     // how fast turning builds up (radians/sec^2)
     public float maxTurnSpeed;         // max turning speed (radians/sec)
     public float gripFactor;           // 0 = very slidy, 1 = very grippy
@@ -27,6 +28,7 @@ public class CarConfig
                     maxSpeed = 230f,
                     friction = 0.985f,
                     brakingPower = 0.97f,
+                    oobBrakingPower = 0.96f,
                     turnAcceleration = 15f,
                     maxTurnSpeed = 4f,
                     gripFactor = 0.04f
@@ -39,6 +41,7 @@ public class CarConfig
                     maxSpeed = 190f,
                     friction = 0.995f,
                     brakingPower = 0.94f,
+                    oobBrakingPower = 0.96f,
                     turnAcceleration = 6f,
                     maxTurnSpeed = 5f,
                     gripFactor = 0.5f

@@ -33,7 +33,7 @@ public class PieceLibrary
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(1,0), new Point(1,0))
         }),
-        new TrackPiece("3x1_straight", new Point(3,1), TrackType.Straight, 2, new List<Connection>{
+        new TrackPiece("3x1_straight", new Point(3,1), TrackType.Straight, 1, new List<Connection>{
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(2,0), new Point(1,0))
         }),
@@ -41,9 +41,21 @@ public class PieceLibrary
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(3,0), new Point(1,0))
         }),
-        new TrackPiece("5x1_straight", new Point(5,1), TrackType.Straight, 3, new List<Connection>{
+        new TrackPiece("5x1_straight", new Point(5,1), TrackType.Straight, 2, new List<Connection>{
             new Connection(new Point(0,0), new Point(-1,0)),
             new Connection(new Point(4,0), new Point(1,0))
+        }),
+        new TrackPiece("6x1_straight", new Point(6,1), TrackType.Straight, 2, new List<Connection>{
+            new Connection(new Point(0,0), new Point(-1,0)),
+            new Connection(new Point(5,0), new Point(1,0))
+        }),
+        new TrackPiece("7x1_straight", new Point(7,1), TrackType.Straight, 3, new List<Connection>{
+            new Connection(new Point(0,0), new Point(-1,0)),
+            new Connection(new Point(6,0), new Point(1,0))
+        }),
+        new TrackPiece("8x1_straight", new Point(8,1), TrackType.Straight, 3, new List<Connection>{
+            new Connection(new Point(0,0), new Point(-1,0)),
+            new Connection(new Point(7,0), new Point(1,0))
         }),
         new TrackPiece("1x1_turn", new Point(1,1), TrackType.Turn, 1, new List<Connection>{
             new Connection(new Point(0,0), new Point(-1,0)),
