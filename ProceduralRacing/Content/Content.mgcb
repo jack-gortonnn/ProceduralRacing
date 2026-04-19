@@ -13,6 +13,30 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin audio/engine_coast.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:audio/engine_coast.wav
+
+#begin audio/engine_power.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:audio/engine_power.wav
+
+#begin audio/shift_down.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:audio/shift_down.wav
+
+#begin audio/shift_up.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:audio/shift_up.wav
+
 #begin fonts/Formula1.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor

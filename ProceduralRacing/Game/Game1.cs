@@ -117,6 +117,9 @@ namespace ProceduralRacing
             Interface.DrawTextWithBorder(spriteBatch, $"Difficulty - {track.Difficulty}",new Vector2(10, 154), Color.White, Color.Black, 2);
             Interface.DrawTextWithBorder(spriteBatch, $"On track - {car.isOnTrack}", new Vector2(10, 200), Color.White, Color.Black, 2);
 
+            Interface.DrawTextWithBorder(spriteBatch, $"Gear - {car.Gear}", new Vector2(10, 500), Color.White, Color.Black, 2);
+            Interface.DrawTextWithBorder(spriteBatch, $"RPM - {car.RPM}", new Vector2(10, 548), Color.White, Color.Black, 2);
+
             spriteBatch.End();
 
             base.Draw(gameTime);

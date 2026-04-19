@@ -1,70 +1,69 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
+using ProceduralRacing;
 
-namespace ProceduralRacing
+public class Car
 {
-    public class Car
+    private Texture2D sprite;
+    private Vector2 origin;
+    public Vector2 Position;
+    public float Rotation;
+    public float Scale = 0.35f;
+
+    private CarPhysics physics;
+    private CarCollision collision;
+    private CarAudio audio;
+
+    public CarConfig Config => physics.config;
+    public Vector2 Velocity => physics.Velocity;
+    public float RPM => physics.RPM;
+    public int Gear => physics.Gear;
+
+    public bool isOnTrack = true;
+
+    public Car(Vector2 startPos, CarPreset preset)
     {
-        private Texture2D sprite;
-        private Vector2 origin;
+        Position = startPos;
+        physics = new CarPhysics(preset);
+        collision = new CarCollision();
+        audio = new CarAudio();
+    }
 
-        public Vector2 Position;
-        public float Rotation;
-        public float Scale = 0.35f;
+    public void LoadContent(ContentManager content)
+    {
+        sprite = content.Load<Texture2D>("textures/cars/car");
+        origin = new Vector2(sprite.Width / 2, sprite.Height / 2);
+        collision.SetCarDimensions(sprite.Width * Scale, sprite.Height * Scale);
+        audio.LoadContent(content);
+    }
 
-        private CarPhysics physics;
-        private CarCollision collision;
+    public void Update(GameTime gameTime, List<PlacedPiece> track)
+    {
+        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        int oldGear = physics.Gear;
 
-        public bool isOnTrack = true;
-        public Vector2 Velocity => physics.Velocity;
-        public CarConfig Config => physics.config;
+        // 1. Physics Update
+        physics.Update(dt, Keyboard.GetState(), ref Position, ref Rotation);
 
-        public Car(Vector2 startPosition, CarPreset preset)
-        {
-            Position = startPosition;
-            Rotation = 0f;
+        // 2. Audio Update (Logic + Shift Clicks)
+        bool shifted = physics.Gear != oldGear;
+        audio.Update(physics.RPM, 7500f, shifted, physics.IsThrottle);
 
-            physics = new CarPhysics(preset);
-            collision = new CarCollision();
-        }
+        // 3. Track logic
+        isOnTrack = collision.IsOnTrack(Position, Rotation, track);
+        if (!isOnTrack) physics.Velocity *= physics.config.oobBrakingPower;
+    }
 
-        public void LoadContent(ContentManager content)
-        {
-            sprite = content.Load<Texture2D>("textures/cars/car");
-            origin = new Vector2(sprite.Width / 2f, sprite.Height / 2f);
+    public void Draw(SpriteBatch sb) =>
+        sb.Draw(sprite, Position, null, Color.White, Rotation, origin, Scale, 0, 0);
 
-            collision.SetCarDimensions(sprite.Width * Scale, sprite.Height * Scale);
-        }
-
-        public void ResetCar()
-        {
-            Position = new Vector2((Constants.TileSize * 14) + 8, (Constants.TileSize * 14) + 44);
-            Rotation = 0f;
-            physics.Reset();
-        }
-
-        public void Update(GameTime gameTime, List<PlacedPiece> track)
-        {
-            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            KeyboardState kb = Keyboard.GetState();
-
-            // Update physics
-            physics.Update(dt, kb, ref Position, ref Rotation);
-
-            // Check collision and apply out-of-bounds braking
-            isOnTrack = collision.IsOnTrack(Position, Rotation, track);
-            if (!isOnTrack)
-            {
-                physics.ApplyOutOfBoundsBraking();
-            }
-        }
-
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            spriteBatch.Draw(sprite, Position, null, Color.White, Rotation, origin, Scale, SpriteEffects.None, 0f);
-        }
+    public void ResetCar()
+    {
+        Position = new Vector2((Constants.TileSize * 14) + 8, (Constants.TileSize * 14) + 44);
+        Rotation = 0;
+        physics.Velocity = Vector2.Zero; // Reset via public field
     }
 }
