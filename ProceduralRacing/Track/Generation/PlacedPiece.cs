@@ -35,7 +35,7 @@ public class PlacedPiece
     // --- Rendering ---
     public void Draw(SpriteBatch spriteBatch)
     {
-        Vector2 drawPos = (GridPosition.ToVector2() * Constants.TileSize) + (TransformedSize.ToVector2() * 0.5f * Constants.TileSize);
+        Vector2 drawPos = (GridPosition.ToVector2() * Settings.Generation.TileSize) + (TransformedSize.ToVector2() * 0.5f * Settings.Generation.TileSize);
 
         spriteBatch.Draw(
             BasePiece.Texture,

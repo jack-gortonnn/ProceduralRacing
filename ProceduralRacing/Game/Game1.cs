@@ -1,7 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Windows.Forms;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System;
+using ProceduralRacing;
 
 namespace ProceduralRacing
 {
@@ -10,15 +10,7 @@ namespace ProceduralRacing
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-        private Camera camera;
-        private Grid grid;
-        private Track track;
-        private Car car;
-
-        private Random random = new Random();
-        private int seed;
-
-        private float timer = 0f;
+        private Screen activeScreen;
 
         public Game1()
         {
@@ -27,6 +19,8 @@ namespace ProceduralRacing
             graphics.PreferredBackBufferWidth = 800;
             graphics.PreferMultiSampling = true;
             Content.RootDirectory = "Content";
+            graphics.SynchronizeWithVerticalRetrace = false;
+            IsFixedTimeStep = false;
             Window.AllowUserResizing = true;
             IsMouseVisible = true;
             graphics.ApplyChanges();
@@ -34,94 +28,32 @@ namespace ProceduralRacing
 
         protected override void Initialize()
         {
-            Vector2 startPos = new Vector2((Constants.TileSize * 14) + 8, (Constants.TileSize * 14) + 44);
-            seed = random.Next(1, 9999999);
-            grid = new Grid(0, 25, 0, 25, Constants.TileSize);
-            track = new Track(grid, seed, TrackDifficulty.Easy);
-            car = new Car(startPos, CarPreset.Drifty);
-            camera = new Camera(Vector2.Zero,1f);
-
             Interface.Initialize(Content, GraphicsDevice);
-
+            activeScreen = new MenuScreen(this);
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            car.LoadContent(Content);
             PieceLibrary.LoadContent(Content);
-            track.LoadContent(Content);
+        }
+
+        public void StartGame(int seed)
+        {
+            activeScreen = new GameScreen(this, seed);
         }
 
         protected override void Update(GameTime gameTime)
         {
-            KeyboardState kb = Keyboard.GetState();
-            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            // --- Difficulty selection ---
-            if (kb.IsKeyDown(Keys.D1)) track.SetDifficulty(Content, TrackDifficulty.Easy);
-            if (kb.IsKeyDown(Keys.D2)) track.SetDifficulty(Content, TrackDifficulty.Medium);
-            if (kb.IsKeyDown(Keys.D3)) track.SetDifficulty(Content, TrackDifficulty.Hard);
-            if (kb.IsKeyDown(Keys.D4)) track.SetDifficulty(Content, TrackDifficulty.Extreme);
-
-            // --- Regenerate track ---
-            if (kb.IsKeyDown(Keys.R))
-            {
-                int newSeed = random.Next(10000, 99999);
-                track.Reset(Content, newSeed);
-                car.ResetCar();
-            }
-
-            // --- Track generation tick ---
-            timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (timer >= Constants.SecondsPerStep)
-            {
-                track.Update(gameTime);
-                timer = 0f;
-            }
-
-            // --- Update car ---
-            car.Update(gameTime, track.Pieces);
-
-            // --- Update camera ---
-            camera.FollowCar(car, GraphicsDevice.Viewport, dt, 15f);
-            camera.FollowRotation(car.Rotation, dt, 15f);
-            camera.UpdateZoom(gameTime, kb);
-
+            activeScreen.Update(gameTime);
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
-
-            // --- World ---
-            spriteBatch.Begin(
-                transformMatrix: camera.GetViewMatrix(GraphicsDevice.Viewport),
-                samplerState: SamplerState.PointClamp
-            );
-
-            track.Draw(spriteBatch, grid);
-
-            car.Draw(spriteBatch);
-
-            spriteBatch.End();
-
-            // --- UI ---
-            spriteBatch.Begin();
-
-            Interface.DrawTextWithBorder(spriteBatch, $"Seed - {track.Seed}", new Vector2(10, 10), Color.White, Color.Black, 2);
-            Interface.DrawTextWithBorder(spriteBatch, $"Name - {track.Info.Name}",new Vector2(10, 58), Color.White, Color.Black, 2);
-            Interface.DrawTextWithBorder(spriteBatch, $"Region - {track.Info.RegionName}",new Vector2(10, 106), Color.White, Color.Black, 2);
-            Interface.DrawTextWithBorder(spriteBatch, $"Difficulty - {track.Difficulty}",new Vector2(10, 154), Color.White, Color.Black, 2);
-            Interface.DrawTextWithBorder(spriteBatch, $"On track - {car.isOnTrack}", new Vector2(10, 200), Color.White, Color.Black, 2);
-
-            Interface.DrawTextWithBorder(spriteBatch, $"Gear - {car.Gear}", new Vector2(10, 500), Color.White, Color.Black, 2);
-            Interface.DrawTextWithBorder(spriteBatch, $"RPM - {car.RPM}", new Vector2(10, 548), Color.White, Color.Black, 2);
-
-            spriteBatch.End();
-
+            activeScreen.Draw(spriteBatch, gameTime);
             base.Draw(gameTime);
         }
     }

@@ -4,63 +4,119 @@ using Microsoft.Xna.Framework.Input;
 
 public class CarPhysics
 {
-    public CarConfig config { get; private set; }
     public Vector2 Velocity;
-    public float RPM { get; private set; }
-    public int Gear { get; private set; } = 1;
+    private float turnVelocity;
     public bool IsThrottle { get; private set; }
 
-    private float[] ratios = { 0f, 3.8f, 2.9f, 2.2f, 1.7f, 1.3f };
-    private float shiftTimer = 0f;
-    private Random rng = new Random();
+    public float RPM { get; private set; }
+    public int Gear { get; private set; } = 1;
 
-    public CarPhysics(CarPreset p) => config = CarConfig.FromPreset(p);
+    private readonly record struct Stats(float MaxSpeed, float Acceleration, float Friction,
+          float BrakingPower, float GripFactor, float MaxTurnSpeed, float TurnAcceleration);
+
+    private static readonly Stats Base = new(100f, 50f, 0.985f, 0.94f, 0.75f, 4f, 5f);
+
+    private readonly Stats s;
+    private readonly Engine engine;
+
+    public CarPhysics(Chassis chassis, Engine engine, Tyres tyres)
+    {
+        this.engine = engine;
+        RPM = engine.rpmIdle;
+
+        s = new Stats(
+            Base.MaxSpeed * engine.maxSpeed * chassis.maxSpeed,
+            Base.Acceleration * engine.acceleration,
+            Base.Friction * tyres.friction,
+            Base.BrakingPower * tyres.brakingPower,
+            Base.GripFactor * tyres.gripFactor * chassis.gripFactor,
+            Base.MaxTurnSpeed * tyres.maxTurnSpeed,
+            Base.TurnAcceleration * tyres.turnAcceleration
+        );
+    }
 
     public void Update(float dt, KeyboardState kb, ref Vector2 pos, ref float rot)
     {
         Vector2 fwd = new Vector2((float)Math.Cos(rot), (float)Math.Sin(rot));
+        float fwdSpeed = Vector2.Dot(Velocity, fwd);
+
         IsThrottle = kb.IsKeyDown(Keys.W);
-        float fwdSpeed = Math.Max(0, Vector2.Dot(Velocity, fwd));
+        bool isBrake = kb.IsKeyDown(Keys.S);
 
-        // 1. Steering: Zero at stop, snappy at low speed, heavy at high speed
-        float turnInput = (kb.IsKeyDown(Keys.D) ? 1 : 0) - (kb.IsKeyDown(Keys.A) ? 1 : 0);
-        float turnUnlock = MathHelper.Clamp(fwdSpeed / 50f, 0f, 1f); // Adjust 50f to change 'unlock' speed
-        float speedHeavy = MathHelper.Lerp(1.0f, 0.4f, fwdSpeed / config.maxSpeed);
-        rot += turnInput * config.maxTurnSpeed * turnUnlock * speedHeavy * dt;
-
-        // 2. RPM & Gear Logic
-        if (shiftTimer > 0) shiftTimer -= dt;
-        else
-        {
-            float targetRPM = (fwdSpeed / config.maxSpeed * 7500f * ratios[Gear]) + 1000f;
-            RPM = MathHelper.Lerp(RPM, targetRPM + rng.Next(-50, 50), 0.2f);
-            if (RPM > 6200 && Gear < 5) Shift(1);
-            else if (RPM < 3200 && Gear > 1) Shift(-1);
-        }
-
-        // 3. Movement & Top Speed Gating
-        if (IsThrottle && shiftTimer <= 0)
-        {
-            Velocity += fwd * (config.acceleration * ratios[Gear] * 0.5f) * dt;
-            float gearMax = config.maxSpeed * (0.3f + (Gear * 0.15f)); // Gear 1 = 45%, Gear 5 = 105%
-            if (Velocity.Length() > gearMax) Velocity = Vector2.Normalize(Velocity) * gearMax;
-        }
-        else Velocity *= kb.IsKeyDown(Keys.S) ? config.brakingPower : (float)Math.Pow(config.friction, dt * 60f);
-
-        // 4. Lateral Grip (Drift logic)
-        Vector2 side = new Vector2(-fwd.Y, fwd.X);
-        // While turning at low speeds, we reduce grip slightly to allow the "tank spin"
-        float dynamicGrip = config.gripFactor * MathHelper.Lerp(1.0f, 0.8f, turnUnlock);
-        Velocity -= side * Vector2.Dot(Velocity, side) * dynamicGrip;
+        UpdateSteering(dt, kb, ref rot, fwdSpeed);
+        UpdateVelocity(dt, fwd, fwdSpeed, isBrake);
+        ApplyLateralGrip(dt, fwd, fwdSpeed);
+        UpdateGearAndRPM(dt, fwdSpeed);
 
         pos += Velocity * dt;
-        RPM = MathHelper.Clamp(RPM, 1000, 7700);
     }
 
-    private void Shift(int dir)
+    private void UpdateSteering(float dt, KeyboardState kb, ref float rot, float fwdSpeed)
     {
-        Gear += dir;
-        shiftTimer = 0.15f;
-        Velocity *= 0.97f;
+        float turnInput = (kb.IsKeyDown(Keys.D) ? 1f : 0f) - (kb.IsKeyDown(Keys.A) ? 1f : 0f);
+
+        if (fwdSpeed < -0.5f) turnInput *= -1f;
+
+        float speedFactor = 1f - MathHelper.Clamp(Math.Abs(fwdSpeed) / s.MaxSpeed, 0f, 0.7f);
+        float lerpFactor = 1f - MathF.Exp(-s.TurnAcceleration * dt);
+        turnVelocity = MathHelper.Lerp(turnVelocity, turnInput * s.MaxTurnSpeed * speedFactor, lerpFactor);
+
+        float speedEngagement = MathHelper.Clamp(Math.Abs(fwdSpeed) / 30f, 0f, 1f);
+        rot += turnVelocity * speedEngagement * dt;
+    }
+
+    private void UpdateVelocity(float dt, Vector2 fwd, float fwdSpeed, bool isBrake)
+    {
+        if (IsThrottle)
+        {
+            float speedFraction = Velocity.Length() / s.MaxSpeed;
+            float accelerationCurve = MathF.Pow(1f - speedFraction, 2f);
+            Velocity += fwd * s.Acceleration * accelerationCurve * dt;
+        }
+        else if (isBrake && fwdSpeed < 0.5f)
+        {
+            Velocity -= fwd * (s.Acceleration * 0.35f) * dt;
+            if (Velocity.Length() > s.MaxSpeed * 0.4f)
+                Velocity = Vector2.Normalize(Velocity) * (s.MaxSpeed * 0.4f);
+        }
+        else
+        {
+            float factor = isBrake
+                ? (float)Math.Pow(s.BrakingPower, dt * 60f)
+                : (float)Math.Pow(s.Friction, dt * 60f);
+            Velocity *= factor;
+        }
+    }
+
+    private void ApplyLateralGrip(float dt, Vector2 fwd, float fwdSpeed)
+    {
+        Vector2 side = new Vector2(-fwd.Y, fwd.X);
+        float sideVel = Vector2.Dot(Velocity, side);
+        float speedBlend = MathHelper.Clamp(Math.Abs(fwdSpeed) / 5f, 0f, 1f);
+        float gripReduction = 1f - (float)Math.Pow(1f - s.GripFactor, dt * 60f);
+        Velocity -= side * sideVel * gripReduction * speedBlend;
+    }
+
+    private void UpdateGearAndRPM(float dt, float fwdSpeed)
+    {
+        float speed = Math.Max(0f, fwdSpeed);
+
+        Gear = engine.gearRatios.Length - 1;
+        for (int i = 1; i < engine.gearRatios.Length; i++)
+        {
+            if (speed < s.MaxSpeed * engine.gearRatios[i]) { Gear = i; break; }
+        }
+
+        float lo = s.MaxSpeed * engine.gearRatios[Gear - 1];
+        float hi = s.MaxSpeed * engine.gearRatios[Gear];
+        float t = MathHelper.Clamp((speed - lo) / (hi - lo), 0f, 1f);
+
+        float targetRPM = IsThrottle
+            ? MathHelper.Lerp(engine.rpmIdle, engine.rpmMax, t)
+            : engine.rpmIdle;
+
+        float rate = IsThrottle ? 8f : 8f;
+        float lerpFactor = 1f - MathF.Exp(-rate * dt);
+        RPM = MathHelper.Lerp(RPM, targetRPM, lerpFactor);
     }
 }

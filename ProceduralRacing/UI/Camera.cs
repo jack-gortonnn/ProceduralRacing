@@ -1,66 +1,91 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using ProceduralRacing;
 
 public class Camera
 {
-    public Vector2 Position;   // target world position (car)
-    public float Zoom = 1f;
-    public float Rotation = 0f;
+    public Vector2 Position;
+    public float Zoom;
+    public float Rotation;
 
-    public Camera(Vector2 startPosition, float zoom = 1f)
+    private float _previousSpeed;
+    private float _forwardOffset;
+    private float _previousRotation;
+    private float _rotationOffset;
+
+    public Camera(Vector2 startPosition)
     {
         Position = startPosition;
-        Zoom = zoom;
+        Zoom = Settings.Camera.ZoomMax;
+        Rotation = 0f;
     }
 
-    public void FollowCar(Car car, Viewport viewport, float dt, float smoothing)
-    { // Smoothly follow position
-        float speedFactor = car.Velocity.Length() / car.Config.maxSpeed; // 0..1
-        float smoothingFactor = MathHelper.Lerp(smoothing * 0.5f, smoothing, speedFactor);
-
-        Vector2 screenCenter = new Vector2(viewport.Width / 2f, viewport.Height / 2f);
-        Vector2 desiredPosition = car.Position;
-
-        // Smoothly interpolate camera position
-        Position += (desiredPosition - Position) * smoothingFactor * dt;
-    }
-
-    public void FollowRotation(float targetRotation, float dt, float smoothing)
-    { // Smoothly follow rotation
-        float diff = MathHelper.WrapAngle(targetRotation - Rotation);
-        Rotation += diff * smoothing * dt;
-    }
-
-    // Only handles zoom
-    public void UpdateZoom(GameTime gameTime, KeyboardState kb)
+    public void Update(float dt, Car car, Viewport viewport)
     {
-        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        if (kb.IsKeyDown(Keys.Q)) Zoom = MathHelper.Clamp(Zoom - 2f * dt, 0.1f, 10f);
-        if (kb.IsKeyDown(Keys.E)) Zoom = MathHelper.Clamp(Zoom + 2f * dt, 0.1f, 10f);
+        if (dt <= 0f) return;
+
+        UpdatePosition(dt, car);
+        UpdateRotation(dt, car);
+        UpdateZoom(dt, car);
+    }
+
+    private void UpdatePosition(float dt, Car car)
+    {
+        float currentSpeed = car.Velocity.Length();
+        float acceleration = (currentSpeed - _previousSpeed) / dt;
+        _previousSpeed = currentSpeed;
+
+        float targetOffset = -acceleration * Settings.Camera.OffsetStrength;
+        _forwardOffset = MathHelper.Lerp(_forwardOffset, targetOffset,
+            1f - MathF.Exp(-Settings.Camera.OffsetSmoothing * dt));
+
+        Vector2 carForward = new Vector2(
+            (float)Math.Cos(car.Rotation),
+            (float)Math.Sin(car.Rotation));
+
+        Vector2 desiredPosition = car.Position + carForward * _forwardOffset;
+        Position += (desiredPosition - Position) * Settings.Camera.PositionSmoothing * dt;
+    }
+
+    private void UpdateRotation(float dt, Car car)
+    {
+        float angularVelocity = MathHelper.WrapAngle(car.Rotation - _previousRotation) / dt;
+        _previousRotation = car.Rotation;
+
+        float targetOffset = -angularVelocity * Settings.Camera.RotationOffsetStrength;
+        _rotationOffset = MathHelper.Lerp(_rotationOffset, targetOffset,
+            1f - MathF.Exp(-Settings.Camera.RotationOffsetSmoothing * dt));
+
+        float diff = MathHelper.WrapAngle(car.Rotation + _rotationOffset - Rotation);
+        Rotation += diff * Settings.Camera.RotationSmoothing * dt;
+    }
+
+    private void UpdateZoom(float dt, Car car)
+    {
+        float speedRatio = MathHelper.Clamp(
+            car.Velocity.Length() / Settings.Camera.MaxSpeedReference, 0f, 1f);
+
+        float targetZoom = MathHelper.Lerp(
+            Settings.Camera.ZoomMax,
+            Settings.Camera.ZoomMin,
+            speedRatio);
+
+        Zoom = MathHelper.Lerp(Zoom, targetZoom,
+            1f - MathF.Exp(-Settings.Camera.ZoomSmoothing * dt));
     }
 
     public Matrix GetViewMatrix(Viewport viewport)
     {
-        // 3/4ths down the screen
-        Vector2 screenCenter = new Vector2(viewport.Width / 2f, (viewport.Height / 6f)*5f);
+        Vector2 screenCenter = new Vector2(
+            viewport.Width / 2f,
+            viewport.Height * (5f / 6f));
 
-        // Apply -90° offset so car's forward is "up" on screen
         float rotationWithOffset = -Rotation - MathHelper.PiOver2;
 
-        // 1: move world so camera target is at origin
-        Matrix translateToOrigin = Matrix.CreateTranslation(-Position.X, -Position.Y, 0f);
-
-        // 2: rotate around origin
-        Matrix rotation = Matrix.CreateRotationZ(rotationWithOffset);
-
-        // 3: scale around origin
-        Matrix scale = Matrix.CreateScale(Zoom, Zoom, 1f);
-
-        // 4: move origin to screen center
-        Matrix translateToScreen = Matrix.CreateTranslation(screenCenter.X, screenCenter.Y, 0f);
-
-        return translateToOrigin * rotation * scale * translateToScreen;
+        return
+            Matrix.CreateTranslation(-Position.X, -Position.Y, 0f) *
+            Matrix.CreateRotationZ(rotationWithOffset) *
+            Matrix.CreateScale(Zoom, Zoom, 1f) *
+            Matrix.CreateTranslation(screenCenter.X, screenCenter.Y, 0f);
     }
 }

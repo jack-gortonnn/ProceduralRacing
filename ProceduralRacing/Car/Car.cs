@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,48 +14,51 @@ public class Car
     public float Rotation;
     public float Scale = 0.35f;
 
-    private CarPhysics physics;
-    private CarCollision collision;
-    private CarAudio audio;
+    public Chassis Chassis { get; private set; }
+    public Engine Engine { get; private set; }
+    public Tyres Tyres { get; private set; }
 
-    public CarConfig Config => physics.config;
-    public Vector2 Velocity => physics.Velocity;
-    public float RPM => physics.RPM;
-    public int Gear => physics.Gear;
+    private CarPhysics Physics;
+    private CarCollision Collision;
+    private CarAudio Audio;
+
+    public Vector2 Velocity => Physics.Velocity;
+    public float RPM => Physics.RPM;
+    public int Gear => Physics.Gear;
 
     public bool isOnTrack = true;
 
-    public Car(Vector2 startPos, CarPreset preset)
+    public Car(Vector2 startPos, Chassis chassis, Engine engine, Tyres tyres)
     {
         Position = startPos;
-        physics = new CarPhysics(preset);
-        collision = new CarCollision();
-        audio = new CarAudio();
+        Chassis = chassis;
+        Engine = engine;
+        Tyres = tyres;
+
+        Physics = new CarPhysics(chassis, engine, tyres);
+        Collision = new CarCollision();
+        Audio = new CarAudio();
     }
 
     public void LoadContent(ContentManager content)
     {
         sprite = content.Load<Texture2D>("textures/cars/car");
         origin = new Vector2(sprite.Width / 2, sprite.Height / 2);
-        collision.SetCarDimensions(sprite.Width * Scale, sprite.Height * Scale);
-        audio.LoadContent(content);
+        Collision.SetCarDimensions(sprite.Width * Scale * Chassis.collisionScale,
+                                   sprite.Height * Scale * Chassis.collisionScale);
+        Audio.LoadContent(content);
     }
 
     public void Update(GameTime gameTime, List<PlacedPiece> track)
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        int oldGear = physics.Gear;
+        int oldGear = Physics.Gear;
 
-        // 1. Physics Update
-        physics.Update(dt, Keyboard.GetState(), ref Position, ref Rotation);
+        Physics.Update(dt, Keyboard.GetState(), ref Position, ref Rotation);
+        Audio.Update(dt, Physics.RPM, Engine.rpmMax, Physics.IsThrottle, Physics.Gear, oldGear);
 
-        // 2. Audio Update (Logic + Shift Clicks)
-        bool shifted = physics.Gear != oldGear;
-        audio.Update(physics.RPM, 7500f, shifted, physics.IsThrottle);
-
-        // 3. Track logic
-        isOnTrack = collision.IsOnTrack(Position, Rotation, track);
-        if (!isOnTrack) physics.Velocity *= physics.config.oobBrakingPower;
+        isOnTrack = Collision.IsOnTrack(Position, Rotation, track, Chassis.collisionScale);
+        if (!isOnTrack) Physics.Velocity *= (float)Math.Pow(Tyres.oobBrakingPower, dt * 60f);
     }
 
     public void Draw(SpriteBatch sb) =>
@@ -62,8 +66,8 @@ public class Car
 
     public void ResetCar()
     {
-        Position = new Vector2((Constants.TileSize * 14) + 8, (Constants.TileSize * 14) + 44);
+        Position = new Vector2((Settings.Generation.TileSize * 14) + 8, (Settings.Generation.TileSize * 14) + 44);
         Rotation = 0;
-        physics.Velocity = Vector2.Zero; // Reset via public field
+        Physics.Velocity = Vector2.Zero;
     }
 }

@@ -334,7 +334,7 @@ public class TrackGenerator
         ResetState();
 
         var startPiece = new PlacedPiece(PieceLibrary.StartingPiece, 0, false,
-                         new Point(Constants.TrackOriginX, Constants.TrackOriginY));
+                         new Point(Settings.Generation.TrackOriginX, Settings.Generation.TrackOriginY));
         var startEntry = startPiece.TransformedConnections[0];
         var startExit = startPiece.TransformedConnections[1];
         startConnection = new WorldConnection(startPiece.GridPosition + startEntry.Position,
