@@ -92,7 +92,9 @@ namespace ProceduralRacing
                 samplerState: SamplerState.PointClamp
             );
 
+            var sw = System.Diagnostics.Stopwatch.StartNew();
             track.Draw(spriteBatch, grid);
+            sw.Stop();
 
             car.Draw(spriteBatch);
 
@@ -111,6 +113,7 @@ namespace ProceduralRacing
             Interface.DrawTextWithBorder(spriteBatch, $"RPM - {car.RPM}", new Vector2(10, 548), Color.White, Color.Black, 2);
 
             Interface.DrawTextWithBorder(spriteBatch, $"FPS - {fpsDisplay}", new Vector2(10, 596), Color.White, Color.Black, 2);
+            Interface.DrawTextWithBorder(spriteBatch, $"Track draw: {sw.ElapsedMilliseconds}ms", new Vector2(10, 692), Color.White, Color.Black, 2);
 
             spriteBatch.End();
         }

@@ -200,16 +200,14 @@ public class PieceLibrary
     { // Loads textures for all pieces in the library
         foreach (var piece in All)
         {
-            piece.Texture = Content.Load<Texture2D>(
-                $"textures/pieces/{piece.Name}"
-            );
+            piece.Texture = Content.Load<Texture2D>($"textures/pieces/{piece.Name}");
+            piece.CachePixelData();
         }
 
         if (StartingPiece != null)
         {
-            StartingPiece.Texture = Content.Load<Texture2D>(
-                $"textures/pieces/{StartingPiece.Name}"
-            );
+            StartingPiece.Texture = Content.Load<Texture2D>($"textures/pieces/{StartingPiece.Name}");
+            StartingPiece.CachePixelData();
         }
     }
 

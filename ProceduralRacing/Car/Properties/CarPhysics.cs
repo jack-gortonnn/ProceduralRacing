@@ -70,7 +70,7 @@ public class CarPhysics
         if (IsThrottle)
         {
             float speedFraction = Velocity.Length() / s.MaxSpeed;
-            float accelerationCurve = MathF.Pow(1f - speedFraction, 2f);
+            float accelerationCurve = MathF.Pow(1f - speedFraction, 1.7f);
             Velocity += fwd * s.Acceleration * accelerationCurve * dt;
         }
         else if (isBrake && fwdSpeed < 0.5f)

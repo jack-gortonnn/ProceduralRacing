@@ -17,20 +17,26 @@ namespace ProceduralRacing
             carHeight = height;
         }
 
-        public bool IsOnTrack(Vector2 position, float rotation, List<PlacedPiece> track, float collisionScale)
-        { // Returns true if at least two corners of the car's bounding box are on track pieces
+        public bool Update(float dt, Vector2 position, float rotation, List<PlacedPiece> track, float collisionScale, ref Vector2 velocity, float oobBrakingPower, out bool isOnTrack)
+        {
             var overlapping = GetOverlappingPieces(position, track);
-            if (overlapping.Count == 0) return false;
+            if (overlapping.Count == 0)
+            {
+                velocity *= (float)Math.Pow(oobBrakingPower, dt * 60f);
+                isOnTrack = false;
+                return false;
+            }
 
             int onTrack = GetCorners(position, rotation, collisionScale)
                 .Count(corner => overlapping.Any(piece => IsPointOnPiece(corner, piece)));
 
-            return onTrack >= 2;
+            if (onTrack < 2) velocity *= (float)Math.Pow(oobBrakingPower, dt * 60f);
+            isOnTrack = onTrack >= 2;
+            return isOnTrack;
         }
 
         private IEnumerable<Vector2> GetCorners(Vector2 position, float rotation, float scale)
-        { // Yields the four rotated bounding corners, scaled by the collision multiplier
-
+        {
             float hw = carWidth * scale / 2f;
             float hh = carHeight * scale / 2f;
             float cos = (float)Math.Cos(rotation);
@@ -43,8 +49,7 @@ namespace ProceduralRacing
         }
 
         private List<PlacedPiece> GetOverlappingPieces(Vector2 position, List<PlacedPiece> track)
-        { // Broad phase — filters to pieces whose world bounds intersect the car
-
+        {
             float extent = (float)Math.Sqrt(carWidth * carWidth + carHeight * carHeight) / 2f;
             Rectangle carBounds = new((int)(position.X - extent), (int)(position.Y - extent), (int)(extent * 2), (int)(extent * 2));
 
@@ -57,8 +62,7 @@ namespace ProceduralRacing
         }
 
         private bool IsPointOnPiece(Vector2 worldPoint, PlacedPiece piece)
-        { // Transforms a world point into texture space and samples the alpha
-
+        {
             Vector2 local = worldPoint - piece.GridPosition.ToVector2() * Settings.Generation.TileSize;
             Vector2 center = new(piece.TransformedSize.X * Settings.Generation.TileSize / 2f, piece.TransformedSize.Y * Settings.Generation.TileSize / 2f);
 
@@ -75,9 +79,7 @@ namespace ProceduralRacing
             int px = (int)texPoint.X, py = (int)texPoint.Y;
             if (px < 0 || py < 0 || px >= piece.BasePiece.Texture.Width || py >= piece.BasePiece.Texture.Height) return false;
 
-            Color[] pixel = new Color[1];
-            piece.BasePiece.Texture.GetData(0, new Rectangle(px, py, 1, 1), pixel, 0, 1);
-            return pixel[0].A > 128;
+            return piece.BasePiece.PixelData[py * piece.BasePiece.Texture.Width + px].A > 128;
         }
     }
 }

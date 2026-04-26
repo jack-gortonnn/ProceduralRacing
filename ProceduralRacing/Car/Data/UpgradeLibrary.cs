@@ -48,7 +48,7 @@ public class Tyres
         Price = 0,
         friction = 1.0f,
         brakingPower = 1.0f,
-        oobBrakingPower = 1.0f,
+        oobBrakingPower = 0.99f,
         gripFactor = 1.0f,
         turnAcceleration = 1.0f,
         maxTurnSpeed = 1.0f,

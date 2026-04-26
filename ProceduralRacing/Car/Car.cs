@@ -55,10 +55,8 @@ public class Car
         int oldGear = Physics.Gear;
 
         Physics.Update(dt, Keyboard.GetState(), ref Position, ref Rotation);
+        Collision.Update(dt, Position, Rotation, track, Chassis.collisionScale, ref Physics.Velocity, Tyres.oobBrakingPower, out isOnTrack);
         Audio.Update(dt, Physics.RPM, Engine.rpmMax, Physics.IsThrottle, Physics.Gear, oldGear);
-
-        isOnTrack = Collision.IsOnTrack(Position, Rotation, track, Chassis.collisionScale);
-        if (!isOnTrack) Physics.Velocity *= (float)Math.Pow(Tyres.oobBrakingPower, dt * 60f);
     }
 
     public void Draw(SpriteBatch sb) =>

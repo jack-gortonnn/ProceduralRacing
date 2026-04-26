@@ -15,6 +15,7 @@ public class TrackPiece
     public TrackType Type { get; set; }
 	public int Difficulty { get; set; }
     public List<Connection> Connections { get; set; }
+    public Color[] PixelData { get; private set; }
 
     // --- Rendering ---
     public Texture2D Texture { get; set; }
@@ -27,5 +28,12 @@ public class TrackPiece
         Type = type;
 		Difficulty = difficulty;
         Connections = connections;
+    }
+
+    // -- Caching ---
+    public void CachePixelData()
+    {
+        PixelData = new Color[Texture.Width * Texture.Height];
+        Texture.GetData(PixelData);
     }
 }
