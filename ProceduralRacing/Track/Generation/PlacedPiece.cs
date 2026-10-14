@@ -14,14 +14,12 @@ public class PlacedPiece
     public bool IsFlipped { get; }
     public Point GridPosition { get; }
     public Point TransformedSize { get; }
-    public List<Connection> TransformedConnections { get; }
-
-    // --- Generation Helpers ---
-    public List<Candidate> RemainingOptions { get; set; } = new List<Candidate>();
-    public Connection UsedExitConnection { get; set; }
+    public LocalConnection EntryConnection { get; }
+    public LocalConnection ExitConnection { get; }
 
     // --- Constructor ---
-    public PlacedPiece(TrackPiece basePiece, int rotation, bool isFlipped, Point gridPosition)
+    public PlacedPiece(TrackPiece basePiece, int rotation, bool isFlipped, Point gridPosition,
+                        LocalConnection entryConnection, LocalConnection exitConnection)
     {
         BasePiece = basePiece;
         GridPosition = gridPosition;
@@ -29,7 +27,11 @@ public class PlacedPiece
         IsFlipped = isFlipped;
 
         TransformedSize = (Rotation % 2 == 0) ? BasePiece.Size : new Point(BasePiece.Size.Y, BasePiece.Size.X);
-        TransformedConnections = PieceLibrary.GetTransformedConnections(BasePiece, Rotation, IsFlipped);
+
+        // Caller expected to assign the entry and exit connections, since we
+        // don't know how the connections will be used until placement time
+        EntryConnection = entryConnection;
+        ExitConnection = exitConnection;
     }
 
     // --- Rendering ---

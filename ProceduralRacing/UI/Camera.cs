@@ -1,91 +1,69 @@
-﻿using System;
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+// Follows the car smoothly. Three effects give a sense of speed:
+//   lag/lead - the camera is pushed against the car's acceleration, so it drops behind when speeding up
+//              and drifts ahead when braking (showing more of the upcoming corner)
+//   zoom     - zooms out as speed increases
+//   shake    - shakes while the car is off-track, scaled by speed
 
 public class Camera
 {
     public Vector2 Position;
-    public float Zoom;
     public float Rotation;
+    public float Zoom = Settings.Camera.ZoomMax;
 
-    private float _previousSpeed;
-    private float _forwardOffset;
-    private float _previousRotation;
-    private float _rotationOffset;
+    private Vector2 lastCarVelocity;
+    private Vector2 leadOffset;
+    private Vector2 shakeOffset, shakeTarget;
+    private float shakeTimer;
+    private static readonly Random rng = new Random();
 
-    public Camera(Vector2 startPosition)
-    {
-        Position = startPosition;
-        Zoom = Settings.Camera.ZoomMax;
-        Rotation = 0f;
-    }
+    public Camera(Vector2 startPosition) => Position = startPosition;
 
-    public void Update(float dt, Car car, Viewport viewport)
+    public void Update(float dt, Car car)
     {
         if (dt <= 0f) return;
 
-        UpdatePosition(dt, car);
-        UpdateRotation(dt, car);
-        UpdateZoom(dt, car);
-    }
+        // Lag / lead: offset opposite to the car's acceleration
+        Vector2 carAcceleration = (car.Velocity - lastCarVelocity) / dt;
+        lastCarVelocity = car.Velocity;
+        Vector2 targetLead = -carAcceleration * Settings.Camera.LeadStrength;
+        leadOffset = Vector2.Lerp(leadOffset, targetLead, 1f - MathF.Exp(-3f * dt));
 
-    private void UpdatePosition(float dt, Car car)
-    {
-        float currentSpeed = car.Velocity.Length();
-        float acceleration = (currentSpeed - _previousSpeed) / dt;
-        _previousSpeed = currentSpeed;
+        Vector2 target = car.Position + leadOffset;
+        Position = Vector2.Lerp(Position, target, 1f - MathF.Exp(-Settings.Camera.PositionSmoothing * dt));
 
-        float targetOffset = -acceleration * Settings.Camera.OffsetStrength;
-        _forwardOffset = MathHelper.Lerp(_forwardOffset, targetOffset,
-            1f - MathF.Exp(-Settings.Camera.OffsetSmoothing * dt));
+        // Rotation: ease towards the car's heading, always turning the shortest way round
+        float rotationDelta = MathHelper.WrapAngle(car.Rotation - Rotation);
+        Rotation = MathHelper.WrapAngle(Rotation + rotationDelta * (1f - MathF.Exp(-Settings.Camera.RotationSmoothing * dt)));
 
-        Vector2 carForward = new Vector2(
-            (float)Math.Cos(car.Rotation),
-            (float)Math.Sin(car.Rotation));
+        // Zoom: further out at higher speed
+        float speedRatio = MathHelper.Clamp(car.Speed / Settings.Camera.MaxSpeedReference, 0f, 1f);
+        float targetZoom = MathHelper.Lerp(Settings.Camera.ZoomMax, Settings.Camera.ZoomMin, speedRatio);
+        Zoom = MathHelper.Lerp(Zoom, targetZoom, 1f - MathF.Exp(-Settings.Camera.ZoomSmoothing * dt));
 
-        Vector2 desiredPosition = car.Position + carForward * _forwardOffset;
-        Position += (desiredPosition - Position) * Settings.Camera.PositionSmoothing * dt;
-    }
-
-    private void UpdateRotation(float dt, Car car)
-    {
-        float angularVelocity = MathHelper.WrapAngle(car.Rotation - _previousRotation) / dt;
-        _previousRotation = car.Rotation;
-
-        float targetOffset = -angularVelocity * Settings.Camera.RotationOffsetStrength;
-        _rotationOffset = MathHelper.Lerp(_rotationOffset, targetOffset,
-            1f - MathF.Exp(-Settings.Camera.RotationOffsetSmoothing * dt));
-
-        float diff = MathHelper.WrapAngle(car.Rotation + _rotationOffset - Rotation);
-        Rotation += diff * Settings.Camera.RotationSmoothing * dt;
-    }
-
-    private void UpdateZoom(float dt, Car car)
-    {
-        float speedRatio = MathHelper.Clamp(
-            car.Velocity.Length() / Settings.Camera.MaxSpeedReference, 0f, 1f);
-
-        float targetZoom = MathHelper.Lerp(
-            Settings.Camera.ZoomMax,
-            Settings.Camera.ZoomMin,
-            speedRatio);
-
-        Zoom = MathHelper.Lerp(Zoom, targetZoom,
-            1f - MathF.Exp(-Settings.Camera.ZoomSmoothing * dt));
+        // Shake: while off-track, pick a new random target ~12 times a second and glide towards it,
+        // giving a low, rumbly wobble instead of a jittery snap every frame
+        float shake = car.IsOnTrack ? 0f : Settings.Camera.ShakeStrength * MathHelper.Clamp(car.Speed / 40f, 0f, 1f);
+        shakeTimer -= dt;
+        if (shakeTimer <= 0f)
+        {
+            shakeTarget = new Vector2((float)rng.NextDouble() * 2 - 1, (float)rng.NextDouble() * 2 - 1) * shake;
+            shakeTimer = 1f / 12f;
+        }
+        shakeOffset = Vector2.Lerp(shakeOffset, shakeTarget * (shake > 0 ? 1f : 0f), 1f - MathF.Exp(-15f * dt));
     }
 
     public Matrix GetViewMatrix(Viewport viewport)
-    {
-        Vector2 screenCenter = new Vector2(
-            viewport.Width / 2f,
-            viewport.Height * (5f / 6f));
+    { // Puts the car near the bottom of the screen, pointing up, so the player sees more of the road ahead
+        Vector2 screenAnchor = new Vector2(viewport.Width / 2f, viewport.Height * (5f / 6f));
+        Vector2 cameraPos = Position + shakeOffset;
 
-        float rotationWithOffset = -Rotation - MathHelper.PiOver2;
-
-        return
-            Matrix.CreateTranslation(-Position.X, -Position.Y, 0f) *
-            Matrix.CreateRotationZ(rotationWithOffset) *
-            Matrix.CreateScale(Zoom, Zoom, 1f) *
-            Matrix.CreateTranslation(screenCenter.X, screenCenter.Y, 0f);
+        return Matrix.CreateTranslation(-cameraPos.X, -cameraPos.Y, 0f)
+             * Matrix.CreateRotationZ(-MathHelper.PiOver2 - Rotation)
+             * Matrix.CreateScale(Zoom, Zoom, 1f)
+             * Matrix.CreateTranslation(screenAnchor.X, screenAnchor.Y, 0f);
     }
 }

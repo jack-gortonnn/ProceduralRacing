@@ -14,14 +14,14 @@ public class TrackPiece
     public Point Size { get; set; }
     public TrackType Type { get; set; }
 	public int Difficulty { get; set; }
-    public List<Connection> Connections { get; set; }
+    public List<LocalConnection> Connections { get; set; }
     public Color[] PixelData { get; private set; }
 
     // --- Rendering ---
     public Texture2D Texture { get; set; }
 
     // --- Constructor ---
-    public TrackPiece(string name, Point size, TrackType type, int difficulty, List<Connection> connections)
+    public TrackPiece(string name, Point size, TrackType type, int difficulty, List<LocalConnection> connections)
     {
         Name = name;
         Size = size;

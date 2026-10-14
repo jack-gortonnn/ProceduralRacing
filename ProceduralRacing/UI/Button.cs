@@ -1,51 +1,46 @@
-﻿using System;
-using Microsoft.Xna.Framework.Input;
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+
+// A clickable box. Fires OnClick once per click (on the frame the mouse button goes down).
 
 public class Button
 {
-    public Rectangle Bounds { get; set; }
-    public string Text { get; set; }
-    public Color TextColor { get; set; } = Color.White;
-    public Color HoverColor { get; set; } = Color.Yellow;
+    public Rectangle Bounds;
+    public string Text;
+    public Action OnClick;
+    public bool Selected;     // drawn highlighted, e.g. the chosen difficulty
+    public float TextScale = 1f;
 
-    // An event or action to trigger when clicked
-    public Action OnClick { get; set; }
-
-    private bool _isHovering;
+    private bool isHovering;
+    private bool wasPressed;
 
     public Button(Rectangle bounds, string text, Action onClick)
     {
         Bounds = bounds;
         Text = text;
         OnClick = onClick;
+        wasPressed = Mouse.GetState().LeftButton == ButtonState.Pressed; // ignore a click that's still held from the previous screen
     }
 
     public void Update()
     {
         MouseState mouse = Mouse.GetState();
-        Point mousePos = mouse.Position;
+        isHovering = Bounds.Contains(mouse.Position);
+        bool isPressed = mouse.LeftButton == ButtonState.Pressed;
 
-        _isHovering = Bounds.Contains(mousePos);
-
-        if (_isHovering && mouse.LeftButton == ButtonState.Pressed)
-        {
+        if (isHovering && isPressed && !wasPressed)
             OnClick?.Invoke();
-        }
+
+        wasPressed = isPressed;
     }
 
-    public void Draw(SpriteBatch spriteBatch)
+    public void Draw(SpriteBatch sb)
     {
-        Color currentColor = _isHovering ? HoverColor : TextColor;
-
-        Interface.DrawTextWithBorder(
-            spriteBatch,
-            Text,
-            new Vector2(Bounds.X, Bounds.Y),
-            currentColor,
-            Color.Black,
-            2
-        );
+        Color fill = Selected ? Interface.Accent : isHovering ? new Color(55, 62, 80) : new Color(36, 40, 52);
+        Interface.DrawRect(sb, Bounds, fill);
+        Interface.DrawOutline(sb, Bounds, isHovering ? Color.White : Interface.PanelBorder, 2);
+        Interface.DrawText(sb, Text, Bounds.Center.ToVector2(), Interface.Text, TextScale, centered: true);
     }
 }

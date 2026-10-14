@@ -4,6 +4,10 @@ using Microsoft.Xna.Framework.Content;
 using System;
 using System.Collections.Generic;
 
+// The Track class owns the TrackGenerator and manages the overall track generation process.
+// It uses a TrackGenerator to create a series of PlacedPieces based on a seed and difficulty level.
+// The class handles loading background textures, updating the track generation process,
+// and drawing the track pieces to the screen. It also provides functionality to reset the track with new parameters.
 public class Track
 {
     private TrackGenerator Generator;
@@ -14,6 +18,8 @@ public class Track
 
     public List<PlacedPiece> Pieces => Generator.Track;
 
+    public bool IsComplete => Generator.TrackIsClosed;
+
     public int Seed { get; private set; }
 
     public TrackDifficulty Difficulty { get; private set; }
@@ -21,7 +27,7 @@ public class Track
     private Texture2D backgroundTexture;
 
     public Track(Grid grid, int seed, TrackDifficulty difficulty)
-    {
+    { // Initializes the track with a grid, seed, and difficulty level, and starts the track generation process
         Grid = grid;
         Seed = seed;
         Difficulty = difficulty;
@@ -29,11 +35,8 @@ public class Track
     }
 
     public void LoadContent(ContentManager content)
-    {
-        if (!string.IsNullOrEmpty(Info.BackgroundPath))
-        {
-            backgroundTexture = content.Load<Texture2D>(Info.BackgroundPath);
-        }
+    { // Loads only the background texture, track textures are handled in the PieceLibrary
+        backgroundTexture = content.Load<Texture2D>(Info.BackgroundPath);
     }
 
     private void InitGenerator()
@@ -56,29 +59,5 @@ public class Track
         {
             piece.Draw(spriteBatch);
         }
-    }
-
-
-    public void Reset(ContentManager content, int? newSeed = null, TrackDifficulty? newDifficulty = null)
-    {
-        if (newSeed.HasValue) Seed = newSeed.Value;
-        if (newDifficulty.HasValue) Difficulty = newDifficulty.Value;
-
-        InitGenerator();
-        LoadContent(content);
-    }
-
-    public void SetDifficulty(ContentManager content, TrackDifficulty newDifficulty)
-    {
-        Difficulty = newDifficulty;
-        InitGenerator();
-        LoadContent(content);
-    }
-
-    public void SetSeed(ContentManager content, int newSeed)
-    {
-        Seed = newSeed;
-        InitGenerator();
-        LoadContent(content);
     }
 }
